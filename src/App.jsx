@@ -6,8 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
 // import Home from './pages/Home';
 import { getUser } from "./api/strapi/userApi";
+import { getShopByUserId } from "./api/strapi/shopApi";
 
-const LiffCustomer = import.meta.env.VITE_LIFF_ID;
+const LiffPartner = import.meta.env.VITE_LIFF_ID;
 
 const App = () => {
     const navigate = useNavigate();
@@ -34,7 +35,7 @@ const App = () => {
                 }
 
                 // Initialize LIFF
-                await liff.init({ liffId: LiffCustomer });
+                await liff.init({ liffId: LiffPartner });
                 // console.log("LIFF initialized successfully.");
 
                 // const userId = localStorage.getItem("lineId");
@@ -77,6 +78,13 @@ const App = () => {
                         console.log('userData.userType: ', userData.userType );
                         if (userData.userType === "shop") {
                             // This line is login success
+                            console.log("userData.id: ", userData.id);
+                            const shopData = await getShopByUserId(userData.id, token);
+                            if (shopData) {
+                                console.log('shopData: ', shopData);
+                                console.log('shopData.id: ', shopData.id);
+                                localStorage.setItem('shopId', shopData.id);
+                            }
                             console.log("Login successful. Redirecting to app...");
                             navigate('/partner/add-product');
                         } else if (userData.userType === "customer") {

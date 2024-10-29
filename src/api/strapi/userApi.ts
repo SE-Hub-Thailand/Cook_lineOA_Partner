@@ -95,7 +95,7 @@ export const getUser = async (userId: string, token: string): Promise<User> => {
             },
         };
 
-        // console.log('JSON.stringify(user): ', JSON.stringify(user)); // Log users to check if the mapping worked correctly
+        console.log('JSON.stringify(user): ', JSON.stringify(user)); // Log users to check if the mapping worked correctly
         return user;
 
     } catch (error: any) {

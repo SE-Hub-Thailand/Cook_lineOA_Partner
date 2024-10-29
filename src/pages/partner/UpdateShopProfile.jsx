@@ -1,3 +1,4 @@
+import Header from "../../components/partner/Header";
 import React, { useState, useEffect} from "react";
 import { useNavigate, useParams } from "react-router-dom";
 // import Header from "../components/Header.jsx";
@@ -11,7 +12,7 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import WebcamCapture from "../../components/WebcamCapture.jsx";
 import { getUser, updateUser } from "../../api/strapi/userApi"; // Import createUser function
-import { updateShop, getShopByUserId } from "../../api/strapi/shopApi"; // Import createShop function
+import { updateShop, getShopByUserId, getShopById } from "../../api/strapi/shopApi"; // Import createShop function
 import Alert from "../../components/Alert.jsx";
 import { getAllBank } from "../../api/strapi/bankApi"; // Import getAllBank function
 // import { uploadImage } from "../api/strapi/uploadApi"; // Import uploadImage function
@@ -22,10 +23,10 @@ import WebcamCapture2 from "../../components/WebcamCapture2";
 function UpdateShopProfile() {
 
   const userId = localStorage.getItem('lineId');
-  const userShopId = localStorage.getItem('user');
-//   const userShopId = JSON.parse(localStorage.getItem('user'));
-  console.log("userShopId in Register: ", userShopId);
-  console.log("userShopId in Register.id: ", userShopId.id);
+
+  const shopId = localStorage.getItem('shopId');
+
+  console.log("shopId in Register.id: ", shopId);
   console.log("userId in Register: ", userId);
   const token = localStorage.getItem('token');
   const API_URL = import.meta.env.VITE_API_URL;
@@ -93,8 +94,8 @@ function UpdateShopProfile() {
 		try {
 			setLoading(true);
 			// const userData = await getUser(userId, token);
-			console.log("user.id: ", user.id);
-			const shopData = await getShopByUserId(user.id, token);
+			// console.log("user.id: ", user.id);
+			const shopData = await getShopById(shopId, token);
 			console.log("shopData: ", shopData);
 			setShop(shopData);
 			setFormData({
@@ -111,7 +112,7 @@ function UpdateShopProfile() {
 		}
 		};
 		fetchShop();
-	}, [user.id, token]);
+	}, [shopId, token]);
 
 	useEffect(() => {
 		const fetchBanks = async () => {
@@ -274,9 +275,10 @@ function UpdateShopProfile() {
       </>
       }
     <ThemeProvider theme={theme}>
+	  <Header />
       <FileUpload
-        photoImage={formData.photoImage} // Pass the selected photo to FileUpload component
-        onFileChange={handleFileChange} // Pass handleFileChange function
+        photoImage={shop?.image?.url ? `${API_URL}${shop.image.url}` : ""} // Pass photoImage from the user data
+        onFileChange={handleFileChange}
       />
       <form onSubmit={handleSubmit}>
         <div className="container mx-auto px-4 py-8">

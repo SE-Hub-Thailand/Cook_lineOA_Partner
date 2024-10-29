@@ -135,30 +135,32 @@ export const getShopById = async (id: string, token: string): Promise<Shop> => {
         }
 
         const data = await response.json();
-        console.log('data', data);
+        // console.log('data', data);
         const shop: Shop = {
-            id: data.data.id,
-            name: data.data.attributes.name,
-            location: data.data.attributes.location,
-            latitude: data.data.attributes.latitude,
-            longitude: data.data.attributes.longitude,
-            createdAt: data.data.attributes.createdAt,
-            updatedAt: data.data.attributes.updatedAt,
-            publishedAt: data.data.attributes.publishedAt,
-            image: data.data.attributes.image,
-            bookBankNumber: data.data.attributes.bookBankNumber,
-            bookBankImage: data.data.attributes.image,
+            id: data?.data[0]?.id,
+            name: data?.data[0]?.attributes?.name,
+            location: data?.data[0]?.attributes?.location,
+            latitude: data?.data[0]?.attributes?.latitude,
+            longitude: data?.data[0]?.attributes?.longitude,
+            createdAt: data?.data[0]?.attributes?.createdAt,
+            updatedAt: data?.data[0]?.attributes?.updatedAt,
+            publishedAt: data?.data[0]?.attributes?.publishedAt,
+            image: data?.data[0]?.attributes?.image,
+            bookBankNumber: data?.data[0]?.attributes?.bookBankNumber,
+            bookBankImage: data?.data[0]?.attributes?.image,
             user: {
-                id: data.data.attributes.user.data.id,
-                username: data.data.attributes.user.data.attributes.username,
-                email: data.data.attributes.user.data.attributes.email,
-                fullName: data.data.attributes.user.data.attributes.fullName,
+                id: data?.data[0]?.attributes?.user?.data?.id,
+                username: data?.data[0]?.attributes?.user?.data?.attributes?.username,
+                email: data?.data[0]?.attributes?.user?.data?.attributes?.email,
+                fullName: data?.data[0]?.attributes?.user?.data?.attributes?.fullName,
             },
-            bankName: data.data.attributes.bank.data.attributes.name,
+            bankName: data?.data[0]?.attributes?.bank?.data?.attributes?.name,
 
         };
 
         console.log('shop', shop);
+        console.log('JSON.stringify(shop): ', JSON.stringify(shop)); // Log users to check if the mapping worked correctly
+
         return shop;
     } catch (error) {
         console.error('Error fetching shop by ID:', error.message);
