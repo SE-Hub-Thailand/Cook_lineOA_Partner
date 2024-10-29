@@ -3,13 +3,15 @@ import { createRoot } from 'react-dom/client'
 import { LiffProvider } from 'react-liff';
 import { CartProvider } from './components/CartContext';
 import App from './App.jsx'
+import React, { useState, useEffect } from "react";
+import { useNavigation, useLocation } from 'react-router-dom';
 import './index.css'
 import { createBrowserRouter, RouterProvider} from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import HistoryPoint from './pages/History_point.jsx';
 import HistoryServiceMachine from './pages/History_service_machine.jsx';
 import UserProfile from './pages/UserProfile.jsx';
-import ShopDetails from './pages/ShopDetails.jsx';
+// import ShopDetails from './pages/ShopDetails.jsx';
 // import ShopDetailsKhunnaiwimon from './pages/ShopDetailsKhunnaiwimon.jsx';
 // import MapKhunnaiWimon from './components/MapKhunnaiWimon.jsx';
 // import MapNaitonmai from './components/MapNaitonmai.jsx';
@@ -26,7 +28,7 @@ import ContactUs from './pages/ContactUs.jsx';
 import SelectReceipt from './pages/partner/SelectReceipt.jsx';
 
 import ConfirmOrder from './pages/partner/ConfirmOrder.jsx';
-import ProfileStore from './pages/partner/ProfileStore.jsx';
+// import ProfileStore from './pages/partner/ProfileStore.jsx';
 // import ContactUs_Partner from './pages/partner/ContactUs.jsx';
 import PDPA from './pages/partner/PDPA.jsx';
 import RegisterPartner from './pages/partner/RegisterPartner.jsx';
@@ -40,16 +42,16 @@ import ReceiptModal from './pages/partner/ReceiptModal.jsx';
 import GetRedeem from './pages/partner/GetRedeem.jsx';
 import GetProductItems from './pages/partner/GetProductItems.jsx';
 
-import ChooseWimon from './pages/ChooseWimon.jsx';
+// import ChooseWimon from './pages/ChooseWimon.jsx';
 import Register from './pages/Register.jsx';
 import LoginRegister from './pages/LoginRegister.jsx';
 import Login from './pages/Login.jsx';
 import ShopList from './pages/ShopList.jsx';
 import Map from './pages/Map.jsx';
-import UpdateUserProfile from './pages/UpdateUserProfile.jsx';
+// import UpdateUserProfile from './pages/UpdateUserProfile.jsx';
 import CartSummary from './pages/CartSummary.jsx';
 import LoadingSpinner from './components/LoadingSpinner';
-import PDPA_Customer from './pages/PDPA_Customer.jsx';
+// import PDPA_Customer from './pages/PDPA_Customer.jsx';
 // import RedeemDetails from './pages/RedeemDetails.jsx';
 // import UpdateProfileStore from './pages/partner/UpdateProfileStore.jsx';
 import UpdateShopProfile from './pages/partner/UpdateShopProfile.jsx';
