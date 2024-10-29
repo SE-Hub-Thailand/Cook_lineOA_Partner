@@ -37,7 +37,7 @@ import AddProduct from './pages/partner/AddProduct.jsx';
 import ChooseShop from './pages/ChooseShop.jsx';
 import ShopHome from './pages/partner/ShopHome.jsx';
 import ScanQRCode from './pages/partner/ScanQRCode.jsx';
-import QrReader from './pages/partner/QRReader.jsx';
+import QrReader from './pages/partner/QrReader.jsx';
 import ReceiptModal from './pages/partner/ReceiptModal.jsx';
 import GetRedeem from './pages/partner/GetRedeem.jsx';
 import GetProductItems from './pages/partner/GetProductItems.jsx';
