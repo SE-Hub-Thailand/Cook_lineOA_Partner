@@ -5,7 +5,7 @@ import { createInvoice } from "../../api/strapi/invoiceApi";
 import { updateRedeem } from "../../api/strapi/redeemApi";
 import { useNavigate } from "react-router-dom";
 
-export default function ReceiptModal({redeem, items}) {
+export default function ReceiptModal({id, redeem, items}) {
   if (!redeem || !items) {
     return null;
   }
@@ -30,10 +30,11 @@ export default function ReceiptModal({redeem, items}) {
     setSlidePercent(value);
     setIsCompleted(value === 100);
     if (value === 100) {
-      console.log("updateRedeem... id : ", redeem.id);
-      const response_redeem = await updateRedeem(redeem.id, { status: "approved" });
+      console.log("updateRedeem... id : ", id);
+      const response_redeem = await updateRedeem(id, { status: "approved" });
       if (response_redeem) {
         // console.log("response_redeem.jwt : ", response_redeem.jwt );
+        // const response = await updateProduct( productId, productData)
         console.log("updateRedeem successfully!");
         navigate('/partner/get-money-item');
         // setShowModal(true);

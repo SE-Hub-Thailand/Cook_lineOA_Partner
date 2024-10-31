@@ -19,6 +19,7 @@ import { getAllBank } from "../../api/strapi/bankApi"; // Import getAllBank func
 import LoadingSpinner from "../../components/LoadingSpinner.jsx";
 import { handlePhotoUpload, uploadImageFromBase64 } from "../../api/strapi/uploadApi";
 import WebcamCapture2 from "../../components/WebcamCapture2";
+import CameraCapture from "../../components/CameraCapture";
 
 function UpdateShopProfile() {
 
@@ -37,8 +38,10 @@ function UpdateShopProfile() {
   const [banks, setBanks] = useState([]);
   const [user, setUser] = useState([]);
   const [shop, setShop] = useState([]);
+  const [capturedImage, setCapturedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [hasImage, setHasImage] = useState(false);  // สถานะว่ามีภาพหรือไม่
+  const [fileChange, setFileChange] = useState(false);
 
   const theme = createTheme({
     typography: {
@@ -68,6 +71,15 @@ function UpdateShopProfile() {
 			setLoading(true);
 			const userData = await getUser(userId, token);
 			// const userData = JSON.parse(localStorage.getItem('user'));
+      const shopData = await getShopByUserId(userData.id, token);
+			console.log("shopData: ", shopData);
+			setShop(shopData);
+			// setFormData({
+			// 	storeName: shopData.name || "",
+			// 	bookBankNumber: shopData.bookBankNumber || "",
+			// 	bankName: shopData.bankName || "",
+			// 	bookBankImage: shopData.bookBankImage || "",
+			// });
 			setUser(userData);
 			setFormData({
 				username: userData.username || "",
@@ -78,6 +90,10 @@ function UpdateShopProfile() {
 				cardID: userData.cardID || "",
 				photoImage: userData.photoImage || "", // Assuming the image is not fetched here
 				cardIdImage: userData.cardIdImage || "",
+        storeName: shopData.name || "",
+				bookBankNumber: shopData.bookBankNumber || "",
+				bankName: shopData.bankName || "",
+				bookBankImage: shopData.bookBankImage || "",
 			});
 			setLoading(false);
 		} catch (error) {
@@ -89,30 +105,30 @@ function UpdateShopProfile() {
 		fetchUser();
 	}, [userId, token]);
 
-	useEffect(() => {
-		const fetchShop = async () => {
-		try {
-			setLoading(true);
-			// const userData = await getUser(userId, token);
-			// console.log("user.id: ", user.id);
-			const shopData = await getShopById(shopId, token);
-			console.log("shopData: ", shopData);
-			setShop(shopData);
-			setFormData({
-				storeName: shopData.name || "",
-				bookBankNumber: shopData.bookBankNumber || "",
-				bankName: shopData.bankName || "",
-				bookBankImage: shopData.bookBankImage || "",
-			});
-			setLoading(false);
-		} catch (error) {
-			console.error("Error fetching shop:", error);
-			setError(error.message);
-			setLoading(false);
-		}
-		};
-		fetchShop();
-	}, [shopId, token]);
+	// useEffect(() => {
+	// 	const fetchShop = async () => {
+	// 	try {
+	// 		setLoading(true);
+	// 		const userData = await getUser(userId, token);
+	// 		console.log("user.id: ", user.id);
+	// 		const shopData = await getShopByUserId(userData.id, token);
+	// 		console.log("shopData: ", shopData);
+	// 		setShop(shopData);
+	// 		setFormData({
+	// 			storeName: shopData.name || "",
+	// 			bookBankNumber: shopData.bookBankNumber || "",
+	// 			bankName: shopData.bankName || "",
+	// 			bookBankImage: shopData.bookBankImage || "",
+	// 		});
+	// 		setLoading(false);
+	// 	} catch (error) {
+	// 		console.error("Error fetching shop:", error);
+	// 		setError(error.message);
+	// 		setLoading(false);
+	// 	}
+	// 	};
+	// 	fetchShop();
+	// }, [shopId, token]);
 
 	useEffect(() => {
 		const fetchBanks = async () => {
@@ -164,6 +180,7 @@ function UpdateShopProfile() {
   // Function to handle file change from FileUpload component
   const handleFileChange = (file) => {
     console.log("file change: ", file);
+    setFileChange(true);
     setFormData((prevData) => ({
       ...prevData,
       photoImage: file, // Store the file in formData
@@ -177,15 +194,17 @@ function UpdateShopProfile() {
       bankName: event.target.value,
     }));
   };
-  const handleImageCapture = (id, imageSrc) => {
-    // console.log("imageSrc: ", imageSrc);
-    // console.log("Captured ID:", id);
-    localStorage.setItem(id, imageSrc);
-    if (imageSrc) {
-      setHasImage(true);  // มีภาพอยู่
+  const handleImageCaptured = (id, imageData) => {
+    if (imageData) {
+      localStorage.setItem(id, imageData);
+      console.log("id: ", id);
+      console.log("imageData: ", imageData);
+      setHasImage(true);
+      setCapturedImage(imageData);
+      console.log("imageData: ", imageData);
     } else {
-      setHasImage(false);  // ไม่มีภาพ
-    }
+        setHasImage(false);  // ไม่มีภาพ
+      }
   };
 // ]
 
@@ -202,7 +221,7 @@ function UpdateShopProfile() {
     console.log("formData: ", formData);
     // อัปโหลดรูปภาพก่อน ถ้ามีรูปภาพที่จะอัปโหลด
     let imageId, cardId_id, bookBank_id = 0;
-    if (formData.photoImage) {
+    if (fileChange && formData.photoImage) {
       const { url, id } = await handlePhotoUpload(formData.photoImage);
       imageId = id;
       // ใช้ URL ของรูปภาพและ ID ที่ได้จากการอัปโหลดใน formData หรืออื่น ๆ
@@ -210,6 +229,7 @@ function UpdateShopProfile() {
       console.log("Uploaded Image URL:", url);
       console.log("Uploaded Image ID:", id);
     }
+
     const base64Image = localStorage.getItem('cardIdImage');
     const cardIdImageObject = await uploadImageFromBase64(base64Image)
     if (cardIdImageObject) {
@@ -225,10 +245,10 @@ function UpdateShopProfile() {
 
     const userData = {
       username: formData.username || "cook" + userId ,
-      email: "cook" + userId + "@cook.com", // Assuming email is the same as username in this example
-      password: "cookcook",
-      lineId: userId,
-      userType: "customer",
+      // email: "cook" + userId + "@cook.com", // Assuming email is the same as username in this example
+      // password: "cookcook",
+      // lineId: userId,
+      // userType: "customer",
       photoImage: imageId === 0 ? null : imageId,
       cardIdImage: cardId_id === 0 ? null : cardId_id,
       fullName: formData.fullName,
@@ -250,8 +270,11 @@ function UpdateShopProfile() {
         bankName: formData.bankName,
 
       };
+    console.log("userData: ", userData);
+    console.log("shopData: ", shopData);
+      console.log("token: ",token, "shopId: ", shop?.id, "shopData: ", shopData);
 	const response1 = await updateUser(user?.id, userData, token);
-	const response2 = await updateShop(shop?.id, shopData, token);
+	const response2 = await updateShop(token, shop?.id, shopData);
 	if (response1 && response2) {
 		setShowModal(true);
     } else {
@@ -267,18 +290,24 @@ function UpdateShopProfile() {
       { showModal &&
       <>
         <Alert
-          title="User registered successfully!"
+          title="User updateed successfully!"
           message={`Welcome, ${formData.username}! We’re so happy to have you on Cook Website.`}
           path="/partner/add-product"
+          status="success"
         />
 
       </>
       }
     <ThemeProvider theme={theme}>
 	  <Header />
-      <FileUpload
+      {/* <FileUpload
         photoImage={shop?.image?.url ? `${API_URL}${shop.image.url}` : ""} // Pass photoImage from the user data
         onFileChange={handleFileChange}
+      /> */}
+      <FileUpload
+	  	//  photoImage={user?.photoImage?.url}
+	  	photoImage={user?.photoImage?.url ? `${API_URL}${user.photoImage.url}` : ""} // Pass photoImage from the user data
+        onFileChange={handleFileChange} // Pass handleFileChange function
       />
       <form onSubmit={handleSubmit}>
         <div className="container mx-auto px-4 py-8">
@@ -403,7 +432,12 @@ function UpdateShopProfile() {
               <label className="block text-gray-700 text-sm font-bold mb-2">
                   ถ่ายรูปตนเองพร้อมถือบัตรประจำตัวประชาชน<span className="text-red-500">*</span>
                 </label>
-                <WebcamCapture2 onCapture={handleImageCapture} id="cardIdImage"/>
+                {/* <WebcamCapture2 onCapture={handleImageCapture} id="cardIdImage"/> */}
+                <CameraCapture
+                  onImageCaptured={handleImageCaptured}
+                  initialImage={user?.cardIdImage?.url ? `${API_URL}${user.cardIdImage.url}` : ""} // ใส่ URL ของภาพหรือ Data URL ที่ต้องการ
+                  id="cardIdImage"
+              />
               </div>
 
               <div className="w-full md:w-1/2 px-2 mt-4">
@@ -466,7 +500,12 @@ function UpdateShopProfile() {
             <label className="block text-gray-700 text-sm font-bold mb-2">
 				ถ่ายหน้าบุ๊คแบงก์<span className="text-red-500">*</span>
               </label>
-              <WebcamCapture2 onCapture={handleImageCapture} id="bookBankImage"/>
+              {/* <WebcamCapture2 onCapture={handleImageCapture} id="bookBankImage"/> */}
+              <CameraCapture
+                onImageCaptured={handleImageCaptured}
+                initialImage={shop?.bookBankImage?.url ? `${API_URL}${shop.bookBankImagee.url}` : ""}
+                id="bookBankImage"
+              />
             </div>
           </div>
         <div className="container mx-auto px-4 mt-10 mb-5">

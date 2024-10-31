@@ -25,6 +25,7 @@ import { uploadImageFromBase64 } from "../../api/strapi/uploadApi";
 import { useNavigate } from 'react-router-dom';
 import { createProduct, updateProduct, getAllProductsByShopId } from "../../api/strapi/productApi";
 import { getFormulaPointByPrice } from "../../api/strapi/formulaPointApi";
+import CameraCapture from "../../components/CameraCapture";
 
 const style = {
   position: "absolute",
@@ -47,11 +48,11 @@ const style = {
 // ];
 
 export default function AddProduct() {
-  const shopId = 1;
+  const shopId = localStorage.getItem('shopId');
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:1400';  // Fallback to default if env variable not set
-  // const token = import.meta.env.VITE_TOKEN_TEST;
-  const token = localStorage.getItem('token');
+  const token = import.meta.env.VITE_TOKEN_TEST;
+  // const token = localStorage.getItem('token');
   console.log("token in AddProduct: ", token);
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState([]);
@@ -60,6 +61,8 @@ export default function AddProduct() {
   const [showModal, setShowModal] = useState(false);
   const [hasImage, setHasImage] = useState(false);  // สถานะว่ามีภาพหรือไม่
   const [loading, setLoading] = useState(true);
+  const [capturedImage, setCapturedImage] = useState(null);
+
   const [error, setError] = useState(null);
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -110,7 +113,7 @@ export default function AddProduct() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const ProductData = await getAllProductsByShopId(token, shopId);
+        const ProductData = await getAllProductsByShopId(shopId);
         setProducts(ProductData);
         setLoading(false);
 
@@ -143,14 +146,17 @@ export default function AddProduct() {
   //   }));
   // };
 
-  const handleImageCapture = (id, imageSrc) => {
-    localStorage.setItem(id, imageSrc);
-    console.log("handleImageCapture: ", imageSrc);
-    if (imageSrc) {
-      setHasImage(true);  // มีภาพอยู่
+  const handleImageCaptured = (id, imageData) => {
+    if (imageData) {
+      localStorage.setItem(id, imageData);
+      console.log("id: ", id);
+      console.log("imageData: ", imageData);
+      setHasImage(true);
+      setCapturedImage(imageData);
+      console.log("imageData: ", imageData);
     } else {
-      setHasImage(false);  // ไม่มีภาพ
-    }
+        setHasImage(false);  // ไม่มีภาพ
+      }
   };
 // ]
 
@@ -201,6 +207,8 @@ export default function AddProduct() {
     // }
     console.log("imageId: ", imageId);
     const formula = await getFormulaPointByPrice(1);
+    console.log("formula[0]: ", formula[0]);
+    console.log("formula[0].point: ", formula[0].point);
     const productData = {
       name: formData.productName,
       numStock: formData.numStock,
@@ -308,7 +316,12 @@ export default function AddProduct() {
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                     ถ่ายรูปหรืออัพโหลดภาพสินค้า<span className="text-red-500">*</span>
                   </label>
-                  <WebcamCapture2 onCapture={handleImageCapture} id="productImage" />
+                  {/* <WebcamCapture2 onCapture={handleImageCapture} id="productImage" /> */}
+                  <CameraCapture
+                    onImageCaptured={handleImageCaptured}
+                    initialImage=""// ใส่ URL ของภาพหรือ Data URL ที่ต้องการ
+                    id="productImage"
+                  />
             </div>
             <div className="grid grid-cols-2 w-full md:w-1/2 px-2 mt-8 justify-items-stretch">
               <button
@@ -346,12 +359,12 @@ export default function AddProduct() {
                   <span
                     className={`px-3 py-1 rounded-md text-sm ${
                       product.status === "pending" ? "bg-yellow-200 border border-yellow-200 text-yellow-800" :
-                      product.status === "aproved" ? "bg-green-200 border border-green-200 text-green-800" :
+                      product.status === "approved" ? "bg-green-200 border border-green-200 text-green-800" :
                       product.status === "rejected" ? "bg-red-200 border border-red-200 text-red-800" : ""
                     }`}
                   >
                     {product.status === "pending" ? "รอการอนุมัติ" :
-                    product.status === "aproved" ? "อนุมัติแล้ว" :
+                    product.status === "approved" ? "อนุมัติแล้ว" :
                     product.status === "rejected" ? "ไม่อนุมัติ" : ""}
                   </span>
                 </div>

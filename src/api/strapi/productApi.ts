@@ -3,13 +3,13 @@ import { Product } from './types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:1400';  // Fallback to default if env variable not set
 
-export const getAllProductsByShopId = async (token: string, shopId: number): Promise<Product[]> => {
+export const getAllProductsByShopId = async (shopId: number): Promise<Product[]> => {
     try {
         const url = `${API_URL}/api/products?populate[image]=true&populate[shop]=true&filters[shop][$eq]=${shopId}`;
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${token}`,
+                // Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
         });

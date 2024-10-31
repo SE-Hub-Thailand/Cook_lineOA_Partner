@@ -93,8 +93,15 @@ export const getShopByUserId = async (id: number, token: string): Promise<Shop> 
             user: {
                 id: data?.data[0]?.attributes?.user?.data?.id,
                 username: data?.data[0]?.attributes?.user?.data?.attributes?.username,
+                lineId: data?.data[0]?.attributes?.user?.data?.attributes?.lineId,
                 email: data?.data[0]?.attributes?.user?.data?.attributes?.email,
                 fullName: data?.data[0]?.attributes?.user?.data?.attributes?.fullName,
+                gender: data?.data[0]?.attributes?.user?.data?.attributes?.gender,
+                address: data?.data[0]?.attributes?.user?.data?.attributes?.address,
+                cardID: data?.data[0]?.attributes?.user?.data?.attributes?.cardID,
+                // photoImage: data?.data[0]?.attributes?.user?.data?.attributes?.photoImage.url,
+                telNumber: data?.data[0]?.attributes?.user?.data?.attributes?.telNumber,
+                point: data?.data[0]?.attributes?.user?.data?.attributes?.point,
             },
             bankName: data?.data[0]?.attributes?.bank?.data?.attributes?.name,
 

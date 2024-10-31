@@ -22,9 +22,12 @@ const QrReader = () => {
     console.log(scannedData);
 
     if (scannedData && scannedData.length === 10) {
+      console.log(scannedData);
+
       setScannedResult(scannedData);
       setErrorMessage("");
       scanner.current?.stop();
+      console.log("stop scannedData: ", scannedData);
       navigate('/partner/get-redeem/' + scannedData);
     } else {
       setErrorMessage("QR Code ไม่ถูกต้อง");

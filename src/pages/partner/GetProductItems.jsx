@@ -38,7 +38,7 @@ const style = {
 
 export default function GetProductItems() {
 //   const { id } = useParams();
-  const shopId = 1;
+const shopId = localStorage.getItem('shopId');
   const token = import.meta.env.VITE_TOKEN_TEST ;
   const [products, setProducts] = useState([]);
   // const [redeemDataArray, setRedeemDataArray] = useState(null);
@@ -58,7 +58,7 @@ export default function GetProductItems() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const ProductData = await getAllProductsByShopId(token, shopId);
+        const ProductData = await getAllProductsByShopId(shopId);
         setProducts(ProductData);
         setLoading(false);
 
@@ -110,12 +110,12 @@ export default function GetProductItems() {
               <div className="absolute top-4 right-2">
                 <span
                   className={`px-2 py-1 rounded-md text-sm ${
-                    product.approved === false
-                      ? "text-red-600 border border-red-600"
-                      : "text-green-600 border border-green-600"
+                    product.status === "approved"
+                      ? "text-green-600 border border-green-600"
+                      : "text-red-600 border border-red-600"
                   }`}
                 >
-                  {product.approved === false ? "ยังไม่อนุมัติ" : "อนุมัติแล้ว"}
+                  {product.status === "approved" ? "อนุมัติแล้ว" :"ยังไม่อนุมัติ"}
                 </span>
               </div>
 

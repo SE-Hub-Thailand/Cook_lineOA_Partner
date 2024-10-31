@@ -36,6 +36,7 @@ const style = {
 
 export default function GetMoneyItems() {
   const shopName = "Capybara Shop";
+  const shopId = localStorage.getItem('shopId');
   // const [open, setOpen] = useState(false);
   const [redeem, setRedeem] = useState([]);
   // const [redeemDataArray, setRedeemDataArray] = useState(null);
@@ -79,13 +80,13 @@ export default function GetMoneyItems() {
     const fetchRedeem = async () => {
       try {
         setLoading(true);
-        const redeemData = await getRedeemsByShop(shopName);
+        const redeemData = await getRedeemsByShop(shopId);
         const r = JSON.stringify(redeemData);
         const rr = JSON.parse(r);
         setRedeem(redeemData || []);
-        console.log("type of redeemData: ", typeof redeemData);
-        console.log("type of r: ", typeof r);
-        console.log("type of rr: ", typeof rr);
+        console.log("type of redeemData: ", redeemData);
+        console.log("type of r: ", r);
+        console.log("type of rr: ", rr);
 
         // console.log("helloo filteredRedeem: ", filteredRedeem);
 
@@ -143,13 +144,15 @@ export default function GetMoneyItems() {
             <div key={index} className="w-full bg-white mt-10 rounded-lg shadow-md p-5 relative">
               <div className="absolute top-4 right-2">
                 <span
-                  className={`px-2 py-1 rounded-md text-sm ${
-                    redeem.status === "pending" || redeem.status === "rejected"
+                  className={`px-2 py-1 rounded-md text-sm
+                    ${
+                    redeem.paid === false
                       ? "text-red-600 border border-red-600"
                       : "text-green-600 border border-green-600"
-                  }`}
+                  }`
+                }
                 >
-                  {redeem.status === "pending" || redeem.status === "rejected" ? "ค้างชำระ" : "ชำระแล้ว"}
+                  {redeem.paid === false ? "ค้างชำระ" : "ชำระแล้ว"}
                 </span>
               </div>
 

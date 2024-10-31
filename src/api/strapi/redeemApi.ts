@@ -1,6 +1,5 @@
-import { User } from './../../../vite-project/node_modules/mlly/dist/index.d';
-import { Token } from './../../../node_modules/acorn/dist/acorn.d';
 import { Redeem } from './types';
+
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:1400';  // Fallback to default if env variable not set
 const token = localStorage.getItem('token');
@@ -72,6 +71,7 @@ export const getAllRedeems = async (id: string, token: string): Promise<Redeem[]
 					point: item.attributes.customer?.data?.attributes?.point || 0,
                 },
                 totalPoints: item.attributes.totalPoints,
+                paid: item.attributes.paid,
 				status: item.attributes.status,
 				qrCode: item.attributes.qrCode,
 				productJsonArray: item.attributes.productJsonArray,
@@ -84,19 +84,17 @@ export const getAllRedeems = async (id: string, token: string): Promise<Redeem[]
 				time: item.attributes.time,
             }));
             console.log("heloooo"); // Log to inspect the structure of the response
-            console.log('redeem in gettt[0]: ', redeems);
             console.log('length: ', redeems.length); // Log to inspect the structure of the response
             console.log('redeem in gettt: ', redeems[0]); // Log to inspect the structure of the response
-
+            console.log('redeem in gettt[0]: ', redeems);
             return redeems;
     } catch (error) {
-        console.error('Error fetching redeem:', error.message);
+        console.error('Error fetching recycle machines:', error.message);
         throw error;
     }
 };
 
-
-export const getRedeemsByQrCode = async (qrCode: string): Promise<Redeem> => {
+export const getRedeemsByQrCode = async (qrCode: string): Promise<Redeem[]> => {
     try {
         // URL now includes id filter
         console.log("heloooo");
@@ -123,29 +121,34 @@ export const getRedeemsByQrCode = async (qrCode: string): Promise<Redeem> => {
         // console.log("data: ", data);
         // console.log("data: ", data[0]);
         // Map the response data to an array of HistoryMachine objects
-        const redeems: Redeem = {
-                id: data.data[0].id,
+        const redeems: Redeem[] = data.data
+            // .filter((item: any) => item.attributes.status === 'active') // Filter by status "active"
+            .map((item: any) => ({
+                id: item.id,
                 customer: {
-                    id: data.data[0].attributes.customer?.data?.id || '',
-                    username: data.data[0].attributes.customer?.data?.attributes?.username || '',
-                    email: data.data[0].attributes.customer?.data?.attributes?.email || '',
-                    fullName: data.data[0].attributes.customer?.data?.attributes?.fullName || '',
-                    lineId: data.data[0].attributes.customer?.data?.attributes?.lineId || '',
-                    userType: data.data[0].attributes.customer?.data?.attributes?.userType || '',
-                    point: data.data[0].attributes.customer?.data?.attributes?.point || 0,
+                    id: item.attributes.customer?.data?.id || '',
+                    username: item.attributes.customer?.data?.attributes?.username || '',
+                    email: item.attributes.customer?.data?.attributes?.email || '',
+                    fullName: item.attributes.customer?.data?.attributes?.fullName || '',
+                    lineId: item.attributes.customer?.data?.attributes?.lineId || '',
+                    userType: item.attributes.customer?.data?.attributes?.userType || '',
+					point: item.attributes.customer?.data?.attributes?.point || 0,
                 },
-                totalPoints: data.data[0].attributes.totalPoints,
-				status: data.data[0].attributes.status,
-				qrCode: data.data[0].attributes.qrCode,
-				productJsonArray: data.data[0].attributes.productJsonArray,
+                totalPoints: item.attributes.totalPoints,
+				status: item.attributes.status,
+				qrCode: item.attributes.qrCode,
+				productJsonArray: item.attributes.productJsonArray,
 				shop: {
-					id: data.data[0].attributes.shop?.data?.id || '',
-                    name: data.data[0].attributes.shop?.data?.attributes?.name || '',
-                    // image: data.data.attributes.shop?.data?.attributes?.image || '',
+					id: item.attributes.shop?.data?.id || '',
+                    name: item.attributes.shop?.data?.attributes?.name || '',
+                    image: item.attributes.shop?.data?.attributes?.image || '',
 				},
-				date: data.data[0].attributes.date,
-				time: data.data[0].attributes.time,
-            };
+				date: item.attributes.date,
+				time: item.attributes.time,
+            }));
+            console.log("heloooo"); // Log to inspect the structure of the response
+            console.log('length: ', redeems.length); // Log to inspect the structure of the response
+            console.log('redeem in gettt: ', redeems[0]); // Log to inspect the structure of the response
             console.log('redeem in gettt[0]: ', redeems);
             return redeems;
     } catch (error) {
@@ -155,11 +158,13 @@ export const getRedeemsByQrCode = async (qrCode: string): Promise<Redeem> => {
 };
 
 
-export const getRedeemsByShop = async (shopName: string): Promise<Redeem[]> => {
+
+
+export const getRedeemsByShop = async (shopId: number): Promise<Redeem[]> => {
     try {
         // URL now includes id filter
         console.log("heloooo");
-        const url = `${API_URL}/api/redeems?filters[shop][name][$eq]=${shopName}&populate[customer]=true`;
+        const url = `${API_URL}/api/redeems?filters[shop][id][$eq]=${shopId}&populate[customer]=true`;
         console.log("heloooo2");
 
         const response = await fetch(url, {

@@ -21,14 +21,15 @@ export const getFormulaPointByPrice = async (price: number): Promise<Formula[]> 
         const data = await response.json();
 
         // Filter results to include only those with Price === 1
-        const filteredData = data.data
-            .filter((item: any) => item.attributes.Price === price)
+        // const shops: Shop[] = data.data.map((item: any) => ({
+        const filteredData: Formula[] = data.data
+            .filter((item: any) => item.attributes.price === price)
             .map((item: any) => ({
                 id: item.id,
-                price: item.attributes.Price,
-                point: item.attributes.Point,
+                price: item.attributes.price,
+                point: item.attributes.point,
             }));
-
+            console.log('filteredData:', filteredData);
         return filteredData;
     } catch (error) {
         console.error('Error fetching formula:', (error as Error).message);

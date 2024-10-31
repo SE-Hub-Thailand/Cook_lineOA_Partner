@@ -18,6 +18,7 @@ import { getAllBank } from "../../api/strapi/bankApi"; // Import getAllBank func
 import LoadingSpinner from "../../components/LoadingSpinner.jsx";
 import { handlePhotoUpload, uploadImageFromBase64 } from "../../api/strapi/uploadApi";
 import WebcamCapture2 from "../../components/WebcamCapture2";
+import CameraCapture from "../../components/CameraCapture";
 
 function RegisterPartner() {
   const { id } = useParams();
@@ -47,7 +48,7 @@ function RegisterPartner() {
   const [response_user, setResponse_user] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [hasImage, setHasImage] = useState(false);  // สถานะว่ามีภาพหรือไม่
-
+  const [capturedImage, setCapturedImage] = useState(null);
   const [formData, setFormData] = useState({
     username: displayName,
     password: "",
@@ -78,7 +79,7 @@ useEffect(() => {
 
                 const userDataString = localStorage.getItem('user');
                 const userData = userDataString ? JSON.parse(userDataString) : null;
-
+                setToken(localStorage.getItem('token'));
                 if (userData) {
                     console.log("userData in Register: ", userData);
                     setUser(userData);
@@ -155,15 +156,17 @@ useEffect(() => {
       bankName: event.target.value,
     }));
   };
-  const handleImageCapture = (id, imageSrc) => {
-    // console.log("imageSrc: ", imageSrc);
-    // console.log("Captured ID:", id);
-    localStorage.setItem(id, imageSrc);
-    if (imageSrc) {
-      setHasImage(true);  // มีภาพอยู่
+  const handleImageCaptured = (id, imageData) => {
+    if (imageData) {
+      localStorage.setItem(id, imageData);
+      console.log("id: ", id);
+      console.log("imageData: ", imageData);
+      setHasImage(true);
+      setCapturedImage(imageData);
+      console.log("imageData: ", imageData);
     } else {
-      setHasImage(false);  // ไม่มีภาพ
-    }
+        setHasImage(false);  // ไม่มีภาพ
+      }
   };
 // ]
 
@@ -197,7 +200,7 @@ useEffect(() => {
 	const base64Image2 = localStorage.getItem('bookBankImage');
     const bookBankImageObject = await uploadImageFromBase64(base64Image2)
     if (bookBankImageObject) {
-	  bookBank_id = bookBankImageObject.id;
+	    bookBank_id = bookBankImageObject.id;
       formData.bookBankImage = bookBankImageObject.url;
     }
 
@@ -209,16 +212,17 @@ useEffect(() => {
       userType: "customer",
       photoImage: imageId === 0 ? null : imageId,
       cardIdImage: cardId_id === 0 ? null : cardId_id,
-	    // bookBankImage: bookBank_id === 0 ? null : bookBank_id,
+	    bookBankImage: bookBank_id === 0 ? null : bookBank_id,
 	    // storeName: formData.storeName,
       fullName: formData.fullName,
       telNumber: formData.telNumber,
       gender: formData.gender,
       address: formData.address,
       cardID: formData.cardID,
-      shop: {
-        name: formData.storeName
-      }
+      point: 0,
+      // shop: {
+      //   name: formData.storeName
+      // }
     };
     console.log("id param: ", id);
     console.log("userData before: ", userData);
@@ -228,49 +232,93 @@ useEffect(() => {
       console.log("id: ", id);
       const response_user = await createUser(userData);
       if (response_user.jwt !== undefined) {
-        console.log("response_user : ", response_user );
         console.log("createSuccessful response_user.jwt : ", response_user.jwt );
         localStorage.setItem('token', response_user.jwt);
-        setToken(response_user.jwt);
+        setToken(localStorage.getItem('token'));
         setResponse_user(response_user);
+
+        const get_user = await getUser(userId, response_user.jwt);
+        console.log("get_user.id: ", get_user.id);
+        const shopData = {
+          user: get_user.id,
+          image: imageId === 0 ? null : imageId,
+          bookBankImage: bookBank_id === 0 ? null : bookBank_id,
+          name: formData.storeName,
+          location: formData.address,
+          bookBankNumber: formData.bookBankNumber,
+          bankName: formData.bankName,
+        };
+        const response_shop = await createShop(shopData);
+        if (response_shop) {
+          // console.log("response_shop.jwt : ", response_shop.jwt );
+          console.log("response_user.id: ", response_user.id);
+          console.log("User registered successfully!");
+          console.log("token after: ", token);
+          console.log("localStorage.getItem('token'): ", localStorage.getItem('token'));
+          const response = await updateUser(get_user.id, {userType: "shop"}, response_user.jwt);
+          if (response)
+            setShowModal(true);
+        }
       }
     } else if (id == 1) {
       console.log("id: ", id);
+      console.log("token: ", token);
       const get_user = await getUser(userId, token);
       if (get_user && get_user.id) {
         const response_user = await updateUser(get_user.id, userData, token);
         console.log("response_user : ", response_user );
         setResponse_user(response_user);
+        const get_user = await getUser(userId, token);
+        console.log("get_user.id: ", get_user.id);
+        const shopData = {
+          user: get_user.id,
+          image: imageId === 0 ? null : imageId,
+          bookBankImage: bookBank_id === 0 ? null : bookBank_id,
+          name: formData.storeName,
+          location: formData.address,
+          bookBankNumber: formData.bookBankNumber,
+          bankName: formData.bankName,
+        };
+        const response_shop = await createShop(shopData);
+        if (response_shop) {
+          console.log("response_shop.jwt : ", response_shop.jwt );
+          console.log("User registered successfully!");
+          const response = await updateUser(response_user.id, {userType: "shop"}, token);
+          if (response)
+            setShowModal(true);
+        }
       }
-    }
-    if (response_user) {
-      console.log("response_user: ", response_user);
-      console.log("token after: ", token);
-      const get_user = await getUser(userId, token);
-      console.log("get_user.id: ", get_user.id);
-      const shopData = {
-        user: get_user.id,
-        image: imageId === 0 ? null : imageId,
-        bookBankImage: bookBank_id === 0 ? null : bookBank_id,
-        name: formData.storeName,
-        location: formData.address,
-        bookBankNumber: formData.bookBankNumber,
-        bankName: formData.bankName,
-      };
-      const response_shop = await createShop(shopData);
-      if (response_shop) {
-        console.log("response_shop.jwt : ", response_shop.jwt );
-        console.log("User registered successfully!");
-        const response = await updateUser(response_user.id, {userType: "shop"}, token);
-        if (response)
-          setShowModal(true);
-      }
-      else {
-        throw new Error('User registration failed.');
-      }
-    } else {
+    }  else {
       throw new Error('User registration failed.');
     }
+    // if (response_user) {
+    //   console.log("response_user: ", response_user);
+    //   console.log("token after: ", token);
+    //   const get_user = await getUser(userId, token);
+    //   console.log("get_user.id: ", get_user.id);
+    //   const shopData = {
+    //     user: get_user.id,
+    //     image: imageId === 0 ? null : imageId,
+    //     bookBankImage: bookBank_id === 0 ? null : bookBank_id,
+    //     name: formData.storeName,
+    //     location: formData.address,
+    //     bookBankNumber: formData.bookBankNumber,
+    //     bankName: formData.bankName,
+    //   };
+    //   const response_shop = await createShop(shopData);
+    //   if (response_shop) {
+    //     console.log("response_shop.jwt : ", response_shop.jwt );
+    //     console.log("User registered successfully!");
+    //     const response = await updateUser(response_user.id, {userType: "shop"}, token);
+    //     if (response)
+    //       setShowModal(true);
+    //   }
+      // else {
+      //   throw new Error('User registration failed.');
+      // }
+    // } else {
+    //   throw new Error('User registration failed.');
+    // }
   };
 
   if (loading) return <LoadingSpinner />; // Loading state
@@ -284,8 +332,8 @@ useEffect(() => {
           title="User registered successfully!"
           message={`Welcome, ${formData.username}! We’re so happy to have you on Cook Website.`}
           path="/partner/add-product"
+          status="success"
         />
-
       </>
       }
     <ThemeProvider theme={theme}>
@@ -344,13 +392,22 @@ useEffect(() => {
                 onChange={handleInputChange}
                 inputProps={{
                   maxLength: 10, // จำกัดจำนวนหลักให้ไม่เกิน 10
-                  pattern: "[0-9]*", // อนุญาตเฉพาะตัวเลข^0\d{9}$
+                  pattern: "[0-9]*", // อนุญาตเฉพาะตัวเลข
                   inputMode: "numeric", // แสดงคีย์บอร์ดตัวเลขบนอุปกรณ์มือถือ
-                  }}
-                  error={formData.telNumber && formData.telNumber.length !== 10}
-                  helperText={ formData.telNumber &&
-                  formData.telNumber.length !== 10 ? "เบอร์โทรศัพท์มี 13 หลัก" : ""
-                  }
+                }}
+                error={
+                  formData.telNumber &&
+                  (formData.telNumber.length !== 10 || !/^0[0-9]{9}$/.test(formData.telNumber))
+                }
+                helperText={
+                  formData.telNumber && !/^[0-9]+$/.test(formData.telNumber)
+                    ? "กรุณากรอกเฉพาะตัวเลขเท่านั้น"
+                    : formData.telNumber && formData.telNumber.length !== 10
+                    ? "เบอร์โทรศัพท์ต้องมี 10 หลัก"
+                    : formData.telNumber && !/^0[0-9]{9}$/.test(formData.telNumber)
+                    ? "เบอร์โทรศัพท์ต้องเริ่มต้นด้วยเลข 0"
+                    : ""
+                }
               />
             </div>
 
@@ -406,9 +463,16 @@ useEffect(() => {
                   pattern: "[0-9]*", // อนุญาตเฉพาะตัวเลข
                   inputMode: "numeric", // แสดงคีย์บอร์ดตัวเลขบนอุปกรณ์มือถือ
                   }}
-                  error={formData.cardID && formData.cardID.length !== 13 && formData.cardID.length > 0}  // แสดง error หากไม่ใช่ 13 หลัก
-                  helperText={ formData.cardID &&
-                  formData.cardID.length !== 13 ? "หมายเลขบัตรประจำตัวต้องมี 13 หลัก" : ""
+                  error={
+                    formData.cardID &&
+                    (formData.cardID.length !== 13 || !/^[0-9]+$/.test(formData.cardID))
+                  }
+                  helperText={
+                    formData.cardID && !/^[0-9]+$/.test(formData.cardID)
+                    ? "กรุณากรอกเฉพาะตัวเลขเท่านั้น"
+                    : formData.cardID && formData.cardID.length !== 13
+                    ? "หมายเลขบัตรประจำตัวต้องมี 13 หลัก"
+                    : ""
                   }
                 />
               </div>
@@ -416,7 +480,12 @@ useEffect(() => {
               <label className="block text-gray-700 text-sm font-bold mb-2">
                   ถ่ายรูปตนเองพร้อมถือบัตรประจำตัวประชาชน<span className="text-red-500">*</span>
                 </label>
-                <WebcamCapture2 onCapture={handleImageCapture} id="cardIdImage"/>
+                {/* <WebcamCapture2 onCapture={handleImageCapture} id="cardIdImage"/> */}
+                <CameraCapture
+                  onImageCaptured={handleImageCaptured}
+                  initialImage="" // ใส่ URL ของภาพหรือ Data URL ที่ต้องการ
+                  id="cardIdImage"
+              />
               </div>
 
               <div className="w-full md:w-1/2 px-2 mt-4">
@@ -479,7 +548,12 @@ useEffect(() => {
             <label className="block text-gray-700 text-sm font-bold mb-2">
 				ถ่ายหน้าบุ๊คแบงก์<span className="text-red-500">*</span>
               </label>
-              <WebcamCapture2 onCapture={handleImageCapture} id="bookBankImage"/>
+              {/* <WebcamCapture2 onCapture={handleImageCapture} id="bookBankImage"/> */}
+              <CameraCapture
+                onImageCaptured={handleImageCaptured}
+                initialImage="" // ใส่ URL ของภาพหรือ Data URL ที่ต้องการ
+                id="bookBankImage"
+              />
             </div>
           </div>
         <div className="container mx-auto px-4 mt-10 mb-5">

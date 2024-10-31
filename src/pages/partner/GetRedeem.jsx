@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import TextModal from "../../components/TextModal";
 import { getRedeemsByQrCode } from "../../api/strapi/redeemApi";
 import { getShopById } from "../../api/strapi/shopApi";
+import Alert from "../../components/Alert";
 // import { useNavigate } from 'react-router-dom';
 // export default function GetRedeem({ qrCode}) {
 export default function GetRedeem() {
@@ -17,6 +18,7 @@ export default function GetRedeem() {
 //   const [shop, setShop] = useState(null);
 
   const [redeem, setRedeem] = useState(null);
+  const [redeemId, setRedeemId] = useState(null);
   const [items, setItems] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,19 +34,22 @@ export default function GetRedeem() {
 		// 	setShop(shopData);
 		// 	console.log("heloooo shopData: ", shopData);
 		// }
-        const redeemData = await getRedeemsByQrCode(qrCode);
+    const redeemData = await getRedeemsByQrCode(qrCode);
 		if (redeemData) {
 			setRedeem(redeemData);
-			console.log("helloo redeemData: ", redeemData);
+			console.log("helloo redeemData: ", redeemData[0].id);
+      setRedeemId(redeemData[0].id);
 		}
         // localStorage.setItem('redeem', JSON.stringify(pointsData));
         // getAllHistoryPoints(id, token);
-        console.log("redeemData.productJsonArray: ", redeemData.productJsonArray)
-        console.log("json parse Point: ", redeemData.productJsonArray.length);
-		if (redeemData && redeemData.productJsonArray && redeemData.productJsonArray.length !== undefined) {
-			const list = JSON.parse(redeemData.productJsonArray);
+        console.log("redeemData.productJsonArray: ", redeemData[0].productJsonArray)
+        // console.log("json parse Point: ", redeemData.productJsonArray.length);
+		if (redeemData && redeemData[0].productJsonArray) {
+			const list = JSON.parse(redeemData[0].productJsonArray);
+      console.log("list: ", list);
 			const productArray = JSON.parse(list);
 			setItems(productArray);
+      console.log("productArray: ", productArray);
 			if (productArray.length === 0) {
 				setShowModal(true);
 			}
@@ -89,8 +94,16 @@ export default function GetRedeem() {
 
   return (
     <>
-	{console.log("showModal: ", showModal)}
-      {showModal ? (<TextModal message="ไม่พบข้อมูลสินค้า" path="/partner/qr-reader" />) : (<ReceiptModal redeem={redeem} items={items} />)}
+      { showModal ?
+        (<Alert
+          title="ไม่พบข้อมูลสินค้า!"
+          message=""
+          path="/partner/qr-reader"
+          status="fail"
+        /> )
+        : (<ReceiptModal id={redeemId} redeem={redeem} items={items} />)
+      }
     </>
+
   )
 };

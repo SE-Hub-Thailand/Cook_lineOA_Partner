@@ -27,7 +27,6 @@ export const updateUser = async (userId: number, userData: Record<string, any>, 
         throw error;
     }
 };
-
 export const getUser = async (userId: string, token: string): Promise<User> => {
     if (!userId || !token) {
         throw new Error('No userId or token provided. User must be authenticated.');
@@ -35,9 +34,7 @@ export const getUser = async (userId: string, token: string): Promise<User> => {
 
     try {
         // Use query parameters to filter by lineId if necessary
-        const lowerCaseUserId = userId.toLowerCase(); // แปลง userId เป็นตัวพิมพ์เล็ก
-        console.log('lowerCaseUserId', lowerCaseUserId);
-        const url = `${API_URL}/api/users?populate[photoImage]=true&filters[lineId][$eq]=${lowerCaseUserId}`;
+        const url = `${API_URL}/api/users?populate[photoImage]=true&populate[cardIdImage]=true&populate[shop][image]=true&filters[lineId][$eq]=${userId}`;
         // const url = `${API_URL}/api/users`;
 
 
@@ -68,6 +65,7 @@ export const getUser = async (userId: string, token: string): Promise<User> => {
         if (data.length === 0) {
             throw new Error('No user found with the provided lineId.');
         }
+        // Map over the data to create an array of User objects
         const user ={
             id: data[0].id,
             username: data[0].username,
@@ -81,8 +79,7 @@ export const getUser = async (userId: string, token: string): Promise<User> => {
             userType: data[0].userType,
             point: data[0].point,
             photoImage: data[0].photoImage,
-            createdAt: data[0].createdAt,
-            updatedAt: data[0].updatedAt,
+            cardIdImage: data[0].cardIdImage,
             shop: {
                 id: data[0].shop?.data?.id,
                 name: data[0].shop?.data?.attributes?.name,
@@ -92,10 +89,11 @@ export const getUser = async (userId: string, token: string): Promise<User> => {
                 createdAt: data[0].shop?.data?.attributes?.createdAt,
                 updatedAt: data[0].shop?.data?.attributes?.updatedAt,
                 publishedAt: data[0].shop?.data?.attributes?.publishedAt,
+                image: data[0].shop?.data?.attributes?.image,
             },
         };
 
-        console.log('JSON.stringify(user): ', JSON.stringify(user)); // Log users to check if the mapping worked correctly
+        // console.log('JSON.stringify(user): ', JSON.stringify(user)); // Log users to check if the mapping worked correctly
         return user;
 
     } catch (error: any) {
@@ -103,6 +101,82 @@ export const getUser = async (userId: string, token: string): Promise<User> => {
         throw error;
     }
 };
+
+// export const getUser = async (userId: string, token: string): Promise<User> => {
+//     if (!userId || !token) {
+//         throw new Error('No userId or token provided. User must be authenticated.');
+//     }
+
+//     try {
+//         // Use query parameters to filter by lineId if necessary
+//         // const lowerCaseUserId = userId.toLowerCase(); // แปลง userId เป็นตัวพิมพ์เล็ก
+//         // console.log('lowerCaseUserId', lowerCaseUserId);
+//         const url = `${API_URL}/api/users?populate[photoImage]=true&filters[lineId][$eq]=${uerId}`;
+//         // const url = `${API_URL}/api/users`;
+
+
+//         const response = await fetch(url, {
+//             method: 'GET',
+//             headers: {
+//                 'Authorization': `Bearer ${token}`,  // Include the JWT token in the Authorization header
+//                 'Content-Type': 'application/json',
+//             },
+//         });
+
+//         if (!response.ok) {
+//             const errorData = await response.json();
+//             console.error('Error fetching user:', errorData);
+//             throw new Error(`Request failed with status ${response.status}: ${errorData?.error?.message || 'Unknown error'}`);
+//         }
+//         const data = await response.json();
+//         console.log('data', data); // Log to inspect the structure of the response
+
+//         // Check if data.data exists and is an array
+//         if (!data || !Array.isArray(data)) {
+//             throw new Error('Invalid response format: Expected an array of user data.');
+//         }
+
+//         // // If data.data is an empty array
+//         console.log('data.data.length', data.length); // Log the data to check if it's an array
+//         console.log('data[0].attributes.username', data[0].username); // Log the first item in the array to check the structure
+//         if (data.length === 0) {
+//             throw new Error('No user found with the provided lineId.');
+//         }
+//         const user ={
+//             id: data[0].id,
+//             username: data[0].username,
+//             email: data[0].email,
+//             fullName: data[0].fullName,
+//             lineId: data[0].lineId,
+//             gender: data[0].gender,
+//             address: data[0].address,
+//             cardID: data[0].cardID,
+//             telNumber: data[0].telNumber,
+//             userType: data[0].userType,
+//             point: data[0].point,
+//             photoImage: data[0].photoImage,
+//             createdAt: data[0].createdAt,
+//             updatedAt: data[0].updatedAt,
+//             shop: {
+//                 id: data[0].shop?.data?.id,
+//                 name: data[0].shop?.data?.attributes?.name,
+//                 location: data[0].shop?.data?.attributes?.location,
+//                 latitude: data[0].shop?.data?.attributes?.latitude,
+//                 longitude: data[0].shop?.data?.attributes?.longitude,
+//                 createdAt: data[0].shop?.data?.attributes?.createdAt,
+//                 updatedAt: data[0].shop?.data?.attributes?.updatedAt,
+//                 publishedAt: data[0].shop?.data?.attributes?.publishedAt,
+//             },
+//         };
+
+//         console.log('JSON.stringify(user): ', JSON.stringify(user)); // Log users to check if the mapping worked correctly
+//         return user;
+
+//     } catch (error: any) {
+//         console.error('Error fetching user:', error.message);
+//         throw error;
+//     }
+// };
 
 export const createUser = async (userData: Record<string, any>): Promise<User> => {
     try {
