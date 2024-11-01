@@ -40,7 +40,8 @@ function UpdateShopProfile() {
   const [shop, setShop] = useState([]);
   const [capturedImage, setCapturedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [hasImage, setHasImage] = useState(false);  // สถานะว่ามีภาพหรือไม่
+  const [hasImage, setHasImage] = useState(true);  // สถานะว่ามีภาพหรือไม่
+
   const [fileChange, setFileChange] = useState(false);
 
   const theme = createTheme({
@@ -48,22 +49,6 @@ function UpdateShopProfile() {
       fontFamily: "Sarabun",
     },
   });
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-    storeName: "",
-    fullName: "",
-    telNumber: "",
-    gender: "",
-    address: "",
-    cardID: "",
-    cardIdImage: "",
-    bookBankNumber: "",
-    bankName: "",
-    bookBankImage: "",
-    photoImage: "",
-    checkedOne: false,
-});
 
 	useEffect(() => {
 		const fetchUser = async () => {
@@ -71,18 +56,11 @@ function UpdateShopProfile() {
 			setLoading(true);
 			const userData = await getUser(userId, token);
 			// const userData = JSON.parse(localStorage.getItem('user'));
-      const shopData = await getShopByUserId(userData.id, token);
-			console.log("shopData: ", shopData);
-			setShop(shopData);
-			// setFormData({
-			// 	storeName: shopData.name || "",
-			// 	bookBankNumber: shopData.bookBankNumber || "",
-			// 	bankName: shopData.bankName || "",
-			// 	bookBankImage: shopData.bookBankImage || "",
-			// });
 			setUser(userData);
+      const shopData = await getShopByUserId(userData.id, token);
+			setShop(shopData);
 			setFormData({
-				username: userData.username || "",
+        username: userData.username || "",
 				fullName: userData.fullName || "",
 				telNumber: userData.telNumber || "",
 				gender: userData.gender || "",
@@ -95,16 +73,39 @@ function UpdateShopProfile() {
 				bankName: shopData.bankName || "",
 				bookBankImage: shopData.bookBankImage || "",
 			});
+
 			setLoading(false);
 		} catch (error) {
-			console.error("Error fetching users:", error);
+      console.error("Error fetching users:", error);
 			setError(error.message);
 			setLoading(false);
 		}
-		};
-		fetchUser();
-	}, [userId, token]);
+  };
+  fetchUser();
+}, [userId, token]);
 
+// console.log("user: ", user);
+// console.log("shop: ", shop);
+
+  const [formData, setFormData] = useState({
+    username: user?.username || "",
+		fullName: user?.fullName || "",
+    telNumber: user?.telNumber || "",
+    gender: user?.gender || "",
+    address: user?.address || "",
+    cardID: user?.cardID || "",
+    photoImage: user?.photoImage || "", // Assuming the image is not fetched here
+    cardIdImage: user?.cardIdImage || "",
+    storeName: shop?.name || "",
+    image: shop?.image || "",
+    bookBankNumber: shop?.bookBankNumber || "",
+    bankName: shop?.bankName || "",
+    bookBankImage: shop?.bookBankImage || "",
+    checkedOne: false,
+});
+// console.log("formDataaa: ", formData);
+// console.log("user?.photoImage: ", user?.photoImage, " user?.photoImage.url: ", user?.photoImage.url);
+// console.log("user?.cardIdImage: ", user?.cardIdImager, " user?.cardIdImage.url: ", user?.cardIdImage.url);
 	// useEffect(() => {
 	// 	const fetchShop = async () => {
 	// 	try {
@@ -155,7 +156,8 @@ function UpdateShopProfile() {
       gender,
       address,
       cardID,
-	  bookBankNumber,
+	    bookBankNumber,
+      // bookBankImage,
       bankName,
       // cardIdImage,
       checkedOne,
@@ -170,10 +172,10 @@ function UpdateShopProfile() {
       address &&
       cardID &&
 		  bookBankNumber &&
+      // bookBankImage &&
       bankName &&
-        // cardIdImage &&
-        // hasImage &&
-        checkedOne
+      // cardIdImage &&
+      checkedOne
     );
   }, [formData]);
 
@@ -191,9 +193,10 @@ function UpdateShopProfile() {
   const handleSelectChange = (event) => {
     setFormData((prevData) => ({
       ...prevData,
-      bankName: event.target.value,
+      bankName: event.target.value, // Make sure this key matches the `value` prop
     }));
   };
+
   const handleImageCaptured = (id, imageData) => {
     if (imageData) {
       localStorage.setItem(id, imageData);
@@ -231,12 +234,14 @@ function UpdateShopProfile() {
     }
 
     const base64Image = localStorage.getItem('cardIdImage');
+    console.log("base64Image cardIdImage: ", base64Image);
     const cardIdImageObject = await uploadImageFromBase64(base64Image)
     if (cardIdImageObject) {
       cardId_id = cardIdImageObject.id;
       formData.cardIdImage = cardIdImageObject.url;
     }
 	const base64Image2 = localStorage.getItem('bookBankImage');
+  console.log("base64Image2 bookBankImage: ", base64Image2);
     const bookBankImageObject = await uploadImageFromBase64(base64Image2)
     if (bookBankImageObject) {
 	  bookBank_id = bookBankImageObject.id;
@@ -256,23 +261,24 @@ function UpdateShopProfile() {
       gender: formData.gender,
       address: formData.address,
       cardID: formData.cardID,
-      shop: {
-        name: formData.storeName
-      }
+      shop: shop.id,
+      // shop: {
+      //   name: formData.storeName
+      // }
     };
     const shopData = {
         user: user.id,
-        image: imageId === 0 ? null : imageId,
-        bookBankImage: bookBank_id === 0 ? null : bookBank_id,
+        image: imageId ? imageId : null,
+        bookBankImage: bookBank_id ? bookBank_id : null,
         name: formData.storeName,
         location: formData.address,
         bookBankNumber: formData.bookBankNumber,
         bankName: formData.bankName,
 
       };
-    console.log("userData: ", userData);
-    console.log("shopData: ", shopData);
-      console.log("token: ",token, "shopId: ", shop?.id, "shopData: ", shopData);
+    // console.log("userData: ", userData);
+    // console.log("shopData: ", shopData);
+    //   console.log("token: ",token, "shopId: ", shop?.id, "shopData: ", shopData);
 	const response1 = await updateUser(user?.id, userData, token);
 	const response2 = await updateShop(token, shop?.id, shopData);
 	if (response1 && response2) {
@@ -281,6 +287,10 @@ function UpdateShopProfile() {
       throw new Error('Update failed.');
     }
   };
+  // console.log("user.photoImage.url: ", user.photoImage.url);
+  // console.log("shop: ", shop);
+  // console.log("shop.img: ", shop.image);
+  // console.log("shop.img url: ", shop.image.attributes.url);
 
   if (loading) return <LoadingSpinner />; // Loading state
   if (error) return <p>Error: {error}</p>; // Error state
@@ -304,9 +314,12 @@ function UpdateShopProfile() {
         photoImage={shop?.image?.url ? `${API_URL}${shop.image.url}` : ""} // Pass photoImage from the user data
         onFileChange={handleFileChange}
       /> */}
+      {/* {console.log("shop?.image?.attributes: ", shop?.image?.attributes.url)}
+      {console.log("shop?.bookBankImage?.attributes: ", shop?.bookBankImage?.attributes.url)} */}
+
       <FileUpload
 	  	//  photoImage={user?.photoImage?.url}
-	  	photoImage={user?.photoImage?.url ? `${API_URL}${user.photoImage.url}` : ""} // Pass photoImage from the user data
+	  	photoImage={ shop?.image?.attributes?.url ? `${API_URL}${shop.image.attributes.url}` : ""} // Pass photoImage from the user data
         onFileChange={handleFileChange} // Pass handleFileChange function
       />
       <form onSubmit={handleSubmit}>
@@ -435,6 +448,7 @@ function UpdateShopProfile() {
                 {/* <WebcamCapture2 onCapture={handleImageCapture} id="cardIdImage"/> */}
                 <CameraCapture
                   onImageCaptured={handleImageCaptured}
+                  // user?.cardIdImage?.url
                   initialImage={user?.cardIdImage?.url ? `${API_URL}${user.cardIdImage.url}` : ""} // ใส่ URL ของภาพหรือ Data URL ที่ต้องการ
                   id="cardIdImage"
               />
@@ -472,27 +486,28 @@ function UpdateShopProfile() {
     <FormControl fullWidth>
       <InputLabel id="bank-select-label">ธนาคาร</InputLabel>
       <Select
-          className="bg-white"
-          labelId="bank-select-label"
-          id="bankName"
-          value={formData.bank}
-          label="ธนาคาร"
-          onChange={handleSelectChange}
-          MenuProps={{
-              PaperProps: {
-                  style: {
-                      maxHeight: 200,  // Adjust this value to control the dropdown height
-                  },
-              },
-          }}
+        className="bg-white"
+        labelId="bank-select-label"
+        id="bankName"
+        value={formData.bankName} // Use formData.bankName to match the state update
+        label="ธนาคาร"
+        onChange={handleSelectChange}
+        MenuProps={{
+          PaperProps: {
+            style: {
+              maxHeight: 200, // Adjust this value to control the dropdown height
+            },
+          },
+        }}
       >
-          {banks.map((bank) => (
-              <MenuItem key={bank.id} value={bank.id}>
-                  {bank.name}
-              </MenuItem>
-          ))}
+        {banks.map((bank) => (
+          <MenuItem key={bank.id} value={bank.name}>
+            {bank.name}
+          </MenuItem>
+        ))}
       </Select>
-  </FormControl>
+    </FormControl>
+
 
 
 		</div>
@@ -503,7 +518,8 @@ function UpdateShopProfile() {
               {/* <WebcamCapture2 onCapture={handleImageCapture} id="bookBankImage"/> */}
               <CameraCapture
                 onImageCaptured={handleImageCaptured}
-                initialImage={shop?.bookBankImage?.url ? `${API_URL}${shop.bookBankImagee.url}` : ""}
+                initialImage={shop?.bookBankImage?.attributes?.url ? `${API_URL}${shop.bookBankImage.attributes.url}` : ""}
+                // initialImage={formData.bookBankImage ? formData.bookBankImage : ""} // ใส่ URL ของภาพหรือ Data URL ที่ต้องการ
                 id="bookBankImage"
               />
             </div>
@@ -530,10 +546,10 @@ function UpdateShopProfile() {
           type="submit"
           disabled={!isFormValid || !hasImage || showModal}
           className={`w-full h-12 mb-10 flex justify-center rounded-xl items-center text-white font-bold transition duration-300 ${
-            isFormValid && hasImage && !showModal
+            isFormValid && !showModal
               ? "bg-green-500 hover:bg-green-600 active:bg-green-700"
               : "bg-slate-300 cursor-not-allowed"
-          } ${isFormValid && hasImage && !showModal ? "cursor-pointer" : ""}`}
+          } ${isFormValid && !showModal ? "cursor-pointer" : ""}`}
         >
           บันทึกข้อมูล
         </button>

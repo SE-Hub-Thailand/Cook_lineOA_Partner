@@ -60,7 +60,7 @@ export const getShopByUserId = async (id: number, token: string): Promise<Shop> 
 
     try {
         // const url = `${API_URL}/api/shops/${id}?populate=image`;
-        const url = `${API_URL}/api/shops?populate[image]=true&populate[user]=true&populate[bank]=true&filters[user][$eq]=${id}`;
+        const url = `${API_URL}/api/shops?populate[image]=true&populate[bookBankImage]=true&populate[user]=true&populate[bank]=true&filters[user][$eq]=${id}`;
 
         const response = await fetch(url, {
             method: 'GET',
@@ -87,9 +87,9 @@ export const getShopByUserId = async (id: number, token: string): Promise<Shop> 
             createdAt: data?.data[0]?.attributes?.createdAt,
             updatedAt: data?.data[0]?.attributes?.updatedAt,
             publishedAt: data?.data[0]?.attributes?.publishedAt,
-            image: data?.data[0]?.attributes?.image,
+            image: data?.data[0]?.attributes?.image.data,
             bookBankNumber: data?.data[0]?.attributes?.bookBankNumber,
-            bookBankImage: data?.data[0]?.attributes?.image,
+            bookBankImage: data?.data[0]?.attributes?.bookBankImage.data,
             user: {
                 id: data?.data[0]?.attributes?.user?.data?.id,
                 username: data?.data[0]?.attributes?.user?.data?.attributes?.username,

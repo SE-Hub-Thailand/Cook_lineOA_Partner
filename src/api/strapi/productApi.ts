@@ -91,6 +91,9 @@ export const createProduct = async (
   ) => {
     try {
       const url = `${API_URL}/api/products/${productId}`;
+      console.log('updateProduct productId:', productId);
+      console.log('updateProduct productData:', productData);
+
 
       const response = await fetch(url, {
         method: "PUT",
@@ -113,6 +116,7 @@ export const createProduct = async (
         }),
       });
 
+      console.log('response:', response);
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error updating Product:", errorData);
