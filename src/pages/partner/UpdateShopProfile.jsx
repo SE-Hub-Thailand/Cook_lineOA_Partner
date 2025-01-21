@@ -518,7 +518,7 @@ function UpdateShopProfile() {
               {/* <WebcamCapture2 onCapture={handleImageCapture} id="bookBankImage"/> */}
               <CameraCapture
                 onImageCaptured={handleImageCaptured}
-                initialImage={shop?.bookBankImage?.attributes?.url ? `${API_URL}${shop.bookBankImage.attributes.url}` : ""}
+                initialImage={shop?.bookBankImage?.url ? `${API_URL}${shop.bookBankImage.url}` : ""}
                 // initialImage={formData.bookBankImage ? formData.bookBankImage : ""} // ใส่ URL ของภาพหรือ Data URL ที่ต้องการ
                 id="bookBankImage"
               />
