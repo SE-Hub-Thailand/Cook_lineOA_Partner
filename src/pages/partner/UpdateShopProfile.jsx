@@ -40,7 +40,11 @@ function UpdateShopProfile() {
   const [shop, setShop] = useState([]);
   const [capturedImage, setCapturedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [hasImage, setHasImage] = useState(true);  // สถานะว่ามีภาพหรือไม่
+  const [hasImageCard, setHasImageCard] = useState(true);  // สถานะว่ามีภาพหรือไม่
+  const [hasImageBank, setHasImageBank] = useState(true); 
+  const [dataCardImage, setDataCardImage] = useState(null); 
+  const [dataBankImage, setDataBankImage] = useState(null); 
+
 
   const [fileChange, setFileChange] = useState(false);
 
@@ -139,7 +143,7 @@ function UpdateShopProfile() {
 				setBanks(bankData);
 				setLoading(false);
 			} catch (error) {
-				console.error("Error fetching users:", error);
+				// console.error("Error fetching users:", error);
 				setError(error.message);
 				setLoading(false);
 			}
@@ -199,15 +203,17 @@ function UpdateShopProfile() {
 
   const handleImageCaptured = (id, imageData) => {
     if (imageData) {
-      localStorage.setItem(id, imageData);
+      // localStorage.setItem(id, imageData);
+      if (id === "cardIdImage") {
+        setHasImageCard(true);
+        setDataCardImage(imageData);
+      } else if (id === "bookBankImage") {
+        setHasImageBank(true);
+        setDataBankImage(imageData);
+      }
       console.log("id: ", id);
       console.log("imageData: ", imageData);
-      setHasImage(true);
-      setCapturedImage(imageData);
-      console.log("imageData: ", imageData);
-    } else {
-        setHasImage(false);  // ไม่มีภาพ
-      }
+    } 
   };
 // ]
 
@@ -233,21 +239,27 @@ function UpdateShopProfile() {
       console.log("Uploaded Image ID:", id);
     }
 
-    const base64Image = localStorage.getItem('cardIdImage');
-    console.log("base64Image cardIdImage: ", base64Image);
-    const cardIdImageObject = await uploadImageFromBase64(base64Image)
+    // const base64Image = localStorage.getItem('cardIdImage');
+
+    // console.log("base64Image cardIdImage: ", base64Image);
+    console.log("base64Image cardIdImage: ", dataCardImage);
+
+    const cardIdImageObject = await uploadImageFromBase64(dataCardImage)
     if (cardIdImageObject) {
       cardId_id = cardIdImageObject.id;
       formData.cardIdImage = cardIdImageObject.url;
     }
-	const base64Image2 = localStorage.getItem('bookBankImage');
-  console.log("base64Image2 bookBankImage: ", base64Image2);
-    const bookBankImageObject = await uploadImageFromBase64(base64Image2)
+	// const base64Image2 = localStorage.getItem('bookBankImage');
+  // console.log("base64Image2 bookBankImage: ", base64Image2);
+  console.log("base64Image2 bookBankImage: ", dataBankImage);
+
+    const bookBankImageObject = await uploadImageFromBase64(dataBankImage)
     if (bookBankImageObject) {
 	  bookBank_id = bookBankImageObject.id;
-      formData.bookBankImage = bookBankImageObject.url;
-    }
-
+    formData.bookBankImage = bookBankImageObject.url;
+  }
+  
+  setLoading(true); // Start loading
     const userData = {
       username: formData.username || "cook" + userId ,
       // email: "cook" + userId + "@cook.com", // Assuming email is the same as username in this example
@@ -283,6 +295,7 @@ function UpdateShopProfile() {
 	const response2 = await updateShop(token, shop?.id, shopData);
 	if (response1 && response2) {
 		setShowModal(true);
+    setLoading(false);
     } else {
       throw new Error('Update failed.');
     }
@@ -322,6 +335,9 @@ function UpdateShopProfile() {
 	  	photoImage={ shop?.image?.attributes?.url ? `${API_URL}${shop.image.attributes.url}` : ""} // Pass photoImage from the user data
         onFileChange={handleFileChange} // Pass handleFileChange function
       />
+      {loading ? (
+            <LoadingSpinner />
+        ) : (
       <form onSubmit={handleSubmit}>
         <div className="container mx-auto px-4 py-8">
 
@@ -518,7 +534,7 @@ function UpdateShopProfile() {
               {/* <WebcamCapture2 onCapture={handleImageCapture} id="bookBankImage"/> */}
               <CameraCapture
                 onImageCaptured={handleImageCaptured}
-                initialImage={shop?.bookBankImage?.url ? `${API_URL}${shop.bookBankImage.url}` : ""}
+                initialImage={shop?.bookBankImage?.attributes.url ? `${API_URL}${shop.bookBankImage.attributes.url}` : ""}
                 // initialImage={formData.bookBankImage ? formData.bookBankImage : ""} // ใส่ URL ของภาพหรือ Data URL ที่ต้องการ
                 id="bookBankImage"
               />
@@ -542,19 +558,24 @@ function UpdateShopProfile() {
           </span>
         </div>
         <div className="container mx-auto px-4">
+        {loading ? (
+            <LoadingSpinner />
+        ) : (
         <button
-          type="submit"
-          disabled={!isFormValid || !hasImage || showModal}
-          className={`w-full h-12 mb-10 flex justify-center rounded-xl items-center text-white font-bold transition duration-300 ${
-            isFormValid && !showModal
-              ? "bg-green-500 hover:bg-green-600 active:bg-green-700"
-              : "bg-slate-300 cursor-not-allowed"
+        type="submit"
+        disabled={!isFormValid || !hasImageCard || !hasImageBank || showModal}
+        className={`w-full h-12 mb-10 flex justify-center rounded-xl items-center text-white font-bold transition duration-300 ${
+          isFormValid && !showModal
+          ? "bg-green-500 hover:bg-green-600 active:bg-green-700"
+          : "bg-slate-300 cursor-not-allowed"
           } ${isFormValid && !showModal ? "cursor-pointer" : ""}`}
-        >
+          >
           บันทึกข้อมูล
         </button>
+        )}
         </div>
       </form>
+      )}
     </ThemeProvider>
     </>
   );

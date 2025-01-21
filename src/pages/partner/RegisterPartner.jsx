@@ -47,7 +47,10 @@ function RegisterPartner() {
   const [user, setUser] = useState([]);
   const [response_user, setResponse_user] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [hasImage, setHasImage] = useState(false);  // สถานะว่ามีภาพหรือไม่
+  const [hasImageCard, setHasImageCard] = useState(true);  // สถานะว่ามีภาพหรือไม่
+  const [hasImageBank, setHasImageBank] = useState(true); 
+  const [dataCardImage, setDataCardImage] = useState(null); 
+  const [dataBankImage, setDataBankImage] = useState(null); 
   const [capturedImage, setCapturedImage] = useState(null);
   const [formData, setFormData] = useState({
     username: displayName,
@@ -156,17 +159,20 @@ useEffect(() => {
       bankName: event.target.value,
     }));
   };
+
   const handleImageCaptured = (id, imageData) => {
     if (imageData) {
-      localStorage.setItem(id, imageData);
+      // localStorage.setItem(id, imageData);
+      if (id === "cardIdImage") {
+        setHasImageCard(true);
+        setDataCardImage(imageData);
+      } else if (id === "bookBankImage") {
+        setHasImageBank(true);
+        setDataBankImage(imageData);
+      }
       console.log("id: ", id);
       console.log("imageData: ", imageData);
-      setHasImage(true);
-      setCapturedImage(imageData);
-      console.log("imageData: ", imageData);
-    } else {
-        setHasImage(false);  // ไม่มีภาพ
-      }
+    } 
   };
 // ]
 
@@ -191,19 +197,20 @@ useEffect(() => {
       console.log("Uploaded Image URL:", url);
       console.log("Uploaded Image ID:", id);
     }
-    const base64Image = localStorage.getItem('cardIdImage');
-    const cardIdImageObject = await uploadImageFromBase64(base64Image)
+    // const base64Image = localStorage.getItem('cardIdImage');
+    const cardIdImageObject = await uploadImageFromBase64(dataCardImage)
     if (cardIdImageObject) {
       cardId_id = cardIdImageObject.id;
       formData.cardIdImage = cardIdImageObject.url;
     }
-	const base64Image2 = localStorage.getItem('bookBankImage');
-    const bookBankImageObject = await uploadImageFromBase64(base64Image2)
+	// const base64Image2 = localStorage.getItem('bookBankImage');
+    const bookBankImageObject = await uploadImageFromBase64(dataBankImage)
     if (bookBankImageObject) {
 	    bookBank_id = bookBankImageObject.id;
       formData.bookBankImage = bookBankImageObject.url;
     }
 
+    setLoading(true); // Start loading
       const userData = {
       username: formData.username || "cook" + userId ,
       email: "cook" + userId + "@cook.com", // Assuming email is the same as username in this example
@@ -341,6 +348,9 @@ useEffect(() => {
         photoImage={formData.photoImage} // Pass the selected photo to FileUpload component
         onFileChange={handleFileChange} // Pass handleFileChange function
       />
+      {loading ? (
+            <LoadingSpinner />
+      ) : (
       <form onSubmit={handleSubmit}>
         <div className="container mx-auto px-4 py-8">
 
@@ -574,19 +584,24 @@ useEffect(() => {
           </span>
         </div>
         <div className="container mx-auto px-4">
+        {loading ? (
+            <LoadingSpinner />
+        ) : (
         <button
           type="submit"
-          disabled={!isFormValid || !hasImage || showModal}
+          disabled={!isFormValid || !hasImageCard || !hasImageBank || showModal}
           className={`w-full h-12 mb-10 flex justify-center rounded-xl items-center text-white font-bold transition duration-300 ${
-            isFormValid && hasImage && !showModal
+            isFormValid && hasImageCard && hasImageBank && !showModal
               ? "bg-green-500 hover:bg-green-600 active:bg-green-700"
               : "bg-slate-300 cursor-not-allowed"
-          } ${isFormValid && hasImage && !showModal ? "cursor-pointer" : ""}`}
+          } ${isFormValid && hasImageCard && hasImageBank && !showModal ? "cursor-pointer" : ""}`}
         >
           ลงทะเบียน
         </button>
+        )}
         </div>
       </form>
+      )}
     </ThemeProvider>
     </>
   );

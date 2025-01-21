@@ -130,13 +130,13 @@ const CameraCapture = ({ onImageCaptured, initialImage, id }) => {
         <ActionButton onClick={capturePhoto} disabled={!!capturedImageData}>
           ถ่ายรูป
         </ActionButton>
-        <ActionButton as="label" htmlFor="file-input">
+        <ActionButton as="label" htmlFor={id}>
           เลือกไฟล์
           <input
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
-            id="file-input"
+            id={id}
             style={{ display: "none" }}
           />
         </ActionButton>
