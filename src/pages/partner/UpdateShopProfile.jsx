@@ -437,39 +437,6 @@ function UpdateShopProfile() {
               />
             </div>
 
-            <div className="w-full px-2 mt-4">
-              <TextField
-                id="cardID"
-                label="หมายเลขบัตรประจำตัวประชาชน"
-                variant="outlined"
-                className="w-full bg-white"
-                required
-                value={formData.cardID}
-                onChange={handleInputChange}
-                inputProps={{
-                  maxLength: 13, // จำกัดจำนวนหลักให้ไม่เกิน 13
-                  pattern: "[0-9]*", // อนุญาตเฉพาะตัวเลข
-                  inputMode: "numeric", // แสดงคีย์บอร์ดตัวเลขบนอุปกรณ์มือถือ
-                  }}
-                  error={formData.cardID && formData.cardID.length !== 13 && formData.cardID.length > 0}  // แสดง error หากไม่ใช่ 13 หลัก
-                  helperText={ formData.cardID &&
-                  formData.cardID.length !== 13 ? "หมายเลขบัตรประจำตัวต้องมี 13 หลัก" : ""
-                  }
-                />
-              </div>
-              <div className="w-full px-2 mt-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                  ถ่ายรูปตนเองพร้อมถือบัตรประจำตัวประชาชน<span className="text-red-500">*</span>
-                </label>
-                {/* <WebcamCapture2 onCapture={handleImageCapture} id="cardIdImage"/> */}
-                <CameraCapture
-                  onImageCaptured={handleImageCaptured}
-                  // user?.cardIdImage?.url
-                  initialImage={user?.cardIdImage?.url ? `${API_URL}${user.cardIdImage.url}` : ""} // ใส่ URL ของภาพหรือ Data URL ที่ต้องการ
-                  id="cardIdImage"
-              />
-              </div>
-
               <div className="w-full md:w-1/2 px-2 mt-4">
                 <TextField
                   id="bookBankNumber"

@@ -61,7 +61,7 @@ describe('authenticateUser Real API', () => {
         expect(data.user.email).toBe(identifier);
         console.log('Authentication successful:', data);
       } catch (error) {
-        console.error('Authentication failed:', error.message);
+        // console.error('Authentication failed:', error.message);
         throw error;  // Re-throw the error to fail the test if authentication fails
       }
     });

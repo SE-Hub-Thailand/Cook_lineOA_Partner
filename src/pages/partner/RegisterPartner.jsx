@@ -17,8 +17,9 @@ import { getAllBank } from "../../api/strapi/bankApi"; // Import getAllBank func
 // import { uploadImage } from "../api/strapi/uploadApi"; // Import uploadImage function
 import LoadingSpinner from "../../components/LoadingSpinner.jsx";
 import { handlePhotoUpload, uploadImageFromBase64 } from "../../api/strapi/uploadApi";
-import WebcamCapture2 from "../../components/WebcamCapture2";
+// import WebcamCapture2 from "../../components/WebcamCapture2";
 import CameraCapture from "../../components/CameraCapture";
+import data from "../../components/data.json";
 
 function RegisterPartner() {
   const { id } = useParams();
@@ -44,14 +45,30 @@ function RegisterPartner() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [banks, setBanks] = useState([]);
-  const [user, setUser] = useState([]);
+  // const [user, setUser] = useState([]);
   const [response_user, setResponse_user] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [hasImageCard, setHasImageCard] = useState(true);  // สถานะว่ามีภาพหรือไม่
   const [hasImageBank, setHasImageBank] = useState(true); 
-  const [dataCardImage, setDataCardImage] = useState(null); 
+  // const [dataCardImage, setDataCardImage] = useState(null); 
   const [dataBankImage, setDataBankImage] = useState(null); 
-  const [capturedImage, setCapturedImage] = useState(null);
+  // const [capturedImage, setCapturedImage] = useState(null);
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [subDistricts, setSubDistricts] = useState([]);
+  const [address, setAddress] = useState({
+    houseNumber: "",
+    street: "",
+    subDistrict: "",
+    district: "",
+    province: "",
+    postalCode: "",
+  });
+  const [errors, setErrors] = useState({
+    houseNumber: false,
+    province: false,
+    district: false,
+    subDistrict: false,
+  });
   const [formData, setFormData] = useState({
     username: displayName,
     password: "",
@@ -85,7 +102,7 @@ useEffect(() => {
                 setToken(localStorage.getItem('token'));
                 if (userData) {
                     console.log("userData in Register: ", userData);
-                    setUser(userData);
+                    // setUser(userData);
 
                     // Update formData based on userData
                     setFormData(prevFormData => ({
@@ -119,8 +136,8 @@ useEffect(() => {
       fullName,
       telNumber,
       gender,
-      address,
-      cardID,
+      // address,
+      // cardID,
 	  bookBankNumber,
       bankName,
       // cardIdImage,
@@ -133,15 +150,19 @@ useEffect(() => {
       fullName &&
       telNumber &&
       gender &&
-      address &&
-      cardID &&
+      address.houseNumber &&
+      address.province &&
+      address.district &&
+      address.subDistrict &&
+      // address &&
+      // cardID &&
 		  bookBankNumber &&
       bankName &&
         // cardIdImage &&
         // hasImage &&
         checkedOne
     );
-  }, [formData]);
+  }, [formData, address]);
 
   // Function to handle file change from FileUpload component
   const handleFileChange = (file) => {
@@ -162,11 +183,7 @@ useEffect(() => {
 
   const handleImageCaptured = (id, imageData) => {
     if (imageData) {
-      // localStorage.setItem(id, imageData);
-      if (id === "cardIdImage") {
-        setHasImageCard(true);
-        setDataCardImage(imageData);
-      } else if (id === "bookBankImage") {
+      if (id === "bookBankImage") {
         setHasImageBank(true);
         setDataBankImage(imageData);
       }
@@ -176,19 +193,105 @@ useEffect(() => {
   };
 // ]
 
+useEffect(() => {
+  if (data && Array.isArray(data)) {
+    const uniqueProvinces = [
+      ...new Set(
+        data
+          .filter((entry) => entry.provinceList && entry.provinceList[0])
+          .map((entry) => entry.provinceList[0].provinceName)
+      ),
+    ];
+    setProvinces(uniqueProvinces);
+  }
+}, []);
+
+
+const handleProvinceChange = (event) => {
+  const selectedProvince = event.target.value;
+  setAddress((prev) => ({
+    ...prev,
+    province: selectedProvince,
+    district: "",
+    subDistrict: "",
+    postalCode: "",
+  }));
+
+  const filteredDistricts = data
+    .filter(
+      (entry) =>
+        entry.provinceList &&
+        entry.provinceList[0]?.provinceName === selectedProvince &&
+        entry.districtList
+    )
+    .flatMap((entry) =>
+      entry.districtList.map((d) => d.districtName)
+    );
+  setDistricts([...new Set(filteredDistricts)]); // ลบข้อมูลซ้ำ
+};
+
+const handleDistrictChange = (event) => {
+  const selectedDistrict = event.target.value;
+  setAddress((prev) => ({
+    ...prev,
+    district: selectedDistrict,
+    subDistrict: "",
+    postalCode: "",
+  }));
+
+  const filteredSubDistricts = data
+    .filter(
+      (entry) =>
+        entry.districtList &&
+        entry.districtList.some((d) => d.districtName === selectedDistrict) &&
+        entry.subDistrictList
+    )
+    .flatMap((entry) =>
+      entry.subDistrictList.map((s) => s.subDistrictName)
+    );
+  setSubDistricts([...new Set(filteredSubDistricts)]); // ลบข้อมูลซ้ำ
+};
+
+const handleSubDistrictChange = (event) => {
+  const selectedSubDistrict = event.target.value;
+  const postal = data
+    .find(
+      (entry) =>
+        entry.subDistrictList &&
+        entry.subDistrictList.some((s) => s.subDistrictName === selectedSubDistrict)
+    )
+    ?.zipCode;
+
+  setAddress((prev) => ({
+    ...prev,
+    subDistrict: selectedSubDistrict,
+    postalCode: postal || "ไม่พบรหัสไปรษณีย์",
+  }));
+};
+
+  // const handleInputChange = (e) => {
+  //   const { id, name, value, type, checked } = e.target;
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     [id || name]: type === "checkbox" ? checked : value,
+  //   }));
+  // };
+
   const handleInputChange = (e) => {
     const { id, name, value, type, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [id || name]: type === "checkbox" ? checked : value,
-    }));
+    if (name in address) {
+      setAddress((prev) => ({ ...prev, [name]: value }));
+      setErrors((prev) => ({ ...prev, [name]: !value }));
+    } else {
+      setFormData((prev) => ({ ...prev, [id || name]: type === "checkbox" ? checked : value }));
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     console.log("formData: ", formData);
     // อัปโหลดรูปภาพก่อน ถ้ามีรูปภาพที่จะอัปโหลด
-    let imageId, cardId_id, bookBank_id = 0;
+    let imageId, bookBank_id = 0;
     if (formData.photoImage) {
       const { url, id } = await handlePhotoUpload(formData.photoImage);
       imageId = id;
@@ -198,11 +301,11 @@ useEffect(() => {
       console.log("Uploaded Image ID:", id);
     }
     // const base64Image = localStorage.getItem('cardIdImage');
-    const cardIdImageObject = await uploadImageFromBase64(dataCardImage)
-    if (cardIdImageObject) {
-      cardId_id = cardIdImageObject.id;
-      formData.cardIdImage = cardIdImageObject.url;
-    }
+    // const cardIdImageObject = await uploadImageFromBase64(dataCardImage)
+    // if (cardIdImageObject) {
+    //   cardId_id = cardIdImageObject.id;
+    //   formData.cardIdImage = cardIdImageObject.url;
+    // }
 	// const base64Image2 = localStorage.getItem('bookBankImage');
     const bookBankImageObject = await uploadImageFromBase64(dataBankImage)
     if (bookBankImageObject) {
@@ -218,14 +321,14 @@ useEffect(() => {
       lineId: userId,
       userType: "customer",
       photoImage: imageId === 0 ? null : imageId,
-      cardIdImage: cardId_id === 0 ? null : cardId_id,
-	    bookBankImage: bookBank_id === 0 ? null : bookBank_id,
+      // cardIdImage: cardId_id === 0 ? null : cardId_id,
+	    // bookBankImage: bookBank_id === 0 ? null : bookBank_id,
 	    // storeName: formData.storeName,
       fullName: formData.fullName,
       telNumber: formData.telNumber,
       gender: formData.gender,
-      address: formData.address,
-      cardID: formData.cardID,
+      address: `${address.houseNumber} ${address.street} ${address.subDistrict} ${address.district} ${address.province} ${address.postalCode}`,
+      // cardID: formData.cardID,
       point: 0,
       // shop: {
       //   name: formData.storeName
@@ -251,7 +354,7 @@ useEffect(() => {
           image: imageId === 0 ? null : imageId,
           bookBankImage: bookBank_id === 0 ? null : bookBank_id,
           name: formData.storeName,
-          location: formData.address,
+          location: `${address.houseNumber} ${address.street} ${address.subDistrict} ${address.district} ${address.province} ${address.postalCode}`,
           bookBankNumber: formData.bookBankNumber,
           bankName: formData.bankName,
         };
@@ -271,26 +374,33 @@ useEffect(() => {
       console.log("id: ", id);
       console.log("token: ", token);
       const get_user = await getUser(userId, token);
+      // console.log("get_user.id: ", get_user.id);
       if (get_user && get_user.id) {
-        const response_user = await updateUser(get_user.id, userData, token);
-        console.log("response_user : ", response_user );
+        console.log("get_user.id: ", get_user.id);
+        console.log("userData before update: ", userData);
+        // const response_user = await updateUser(get_user.id, userData, token);
+        // console.log("response_user : ", response_user );
         setResponse_user(response_user);
-        const get_user = await getUser(userId, token);
+        // const get_user = await getUser(userId, token);
         console.log("get_user.id: ", get_user.id);
         const shopData = {
           user: get_user.id,
           image: imageId === 0 ? null : imageId,
           bookBankImage: bookBank_id === 0 ? null : bookBank_id,
           name: formData.storeName,
-          location: formData.address,
+          location: `${address.houseNumber} ${address.street} ${address.subDistrict} ${address.district} ${address.province} ${address.postalCode}`,
           bookBankNumber: formData.bookBankNumber,
           bankName: formData.bankName,
         };
         const response_shop = await createShop(shopData);
         if (response_shop) {
           console.log("response_shop.jwt : ", response_shop.jwt );
-          console.log("User registered successfully!");
-          const response = await updateUser(response_user.id, {userType: "shop"}, token);
+          console.log("User registered successfully! userId: ", userId);
+          console.log("token after: ", token);
+          console.log("localStorage.getItem('token'): ", localStorage.getItem('token'));
+          const response = await updateUser(get_user.id, {userType: "shop"}, token);
+          // const response = await updateUser(get_user.id, {userType: "shop"}, response_user.jwt);
+          console.log("response : ", response );
           if (response)
             setShowModal(true);
         }
@@ -446,57 +556,90 @@ useEffect(() => {
             </div>
 
             <div className="w-full px-2 mt-4">
-              <TextField
-                id="address"
-                label="ที่อยู่"
-                placeholder="ที่อยู่"
-                multiline
-                rows={4}
-                className="w-full bg-white"
-                required
-                value={formData.address}
-                onChange={handleInputChange}
-              />
-            </div>
+          <TextField
+            label="บ้านเลขที่"
+            name="houseNumber"
+            className="w-full bg-white mt-4"
+            value={address.houseNumber}
+            onChange={handleInputChange}
+            error={errors.houseNumber}
+          />
+        </div>
 
-            <div className="w-full px-2 mt-4">
-              <TextField
-                id="cardID"
-                label="หมายเลขบัตรประจำตัวประชาชน"
-                variant="outlined"
-                className="w-full bg-white"
-                required
-                value={formData.cardID}
-                onChange={handleInputChange}
-                inputProps={{
-                  maxLength: 13, // จำกัดจำนวนหลักให้ไม่เกิน 13
-                  pattern: "[0-9]*", // อนุญาตเฉพาะตัวเลข
-                  inputMode: "numeric", // แสดงคีย์บอร์ดตัวเลขบนอุปกรณ์มือถือ
-                  }}
-                  error={
-                    formData.cardID &&
-                    (formData.cardID.length !== 13 || !/^[0-9]+$/.test(formData.cardID))
-                  }
-                  helperText={
-                    formData.cardID && !/^[0-9]+$/.test(formData.cardID)
-                    ? "กรุณากรอกเฉพาะตัวเลขเท่านั้น"
-                    : formData.cardID && formData.cardID.length !== 13
-                    ? "หมายเลขบัตรประจำตัวต้องมี 13 หลัก"
-                    : ""
-                  }
-                />
-              </div>
-              <div className="w-full px-2 mt-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                  ถ่ายรูปตนเองพร้อมถือบัตรประจำตัวประชาชน<span className="text-red-500">*</span>
-                </label>
-                {/* <WebcamCapture2 onCapture={handleImageCapture} id="cardIdImage"/> */}
-                <CameraCapture
-                  onImageCaptured={handleImageCaptured}
-                  initialImage="" // ใส่ URL ของภาพหรือ Data URL ที่ต้องการ
-                  id="cardIdImage"
-              />
-              </div>
+        <div className="w-full px-2 mt-4">
+          <TextField
+            label="ถนน"
+            name="street"
+            className="w-full bg-white mt-4"
+            value={address.street}
+            onChange={handleInputChange}
+            error={errors.street}
+          />
+        </div>
+
+        <div className="w-full px-2 mt-4">
+          <FormControl className="w-full bg-white mt-4">
+            <InputLabel>จังหวัด</InputLabel>
+            <Select
+              value={address.province}
+              onChange={handleProvinceChange}
+              error={errors.province}
+            >
+              {provinces.map((province) => (
+                <MenuItem key={province} value={province}>
+                  {province}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </div>
+
+        <div className="w-full px-2 mt-4">
+          {address.province && (
+            <FormControl className="w-full bg-white mt-4">
+              <InputLabel>อำเภอ</InputLabel>
+              <Select
+                value={address.district}
+                onChange={handleDistrictChange}
+                error={errors.district}
+              >
+                {districts.map((district) => (
+                  <MenuItem key={district} value={district}>
+                    {district}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </div>
+
+        <div className="w-full px-2 mt-4">
+          {address.district && (
+            <FormControl className="w-full bg-white mt-4">
+              <InputLabel>ตำบล</InputLabel>
+              <Select
+                value={address.subDistrict}
+                onChange={handleSubDistrictChange}
+                error={errors.subDistrict}
+              >
+                {subDistricts.map((subDistrict) => (
+                  <MenuItem key={subDistrict} value={subDistrict}>
+                    {subDistrict}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </div>
+
+        <div className="w-full px-2 mt-4">
+          {address.subDistrict && (
+            <div className="mt-4">
+              <strong>รหัสไปรษณีย์:</strong> {address.postalCode}
+            </div>
+          )}
+        </div>
+              
 
               <div className="w-full md:w-1/2 px-2 mt-4">
                 <TextField
@@ -589,12 +732,12 @@ useEffect(() => {
         ) : (
         <button
           type="submit"
-          disabled={!isFormValid || !hasImageCard || !hasImageBank || showModal}
+          disabled={!isFormValid || !hasImageBank || showModal}
           className={`w-full h-12 mb-10 flex justify-center rounded-xl items-center text-white font-bold transition duration-300 ${
-            isFormValid && hasImageCard && hasImageBank && !showModal
+            isFormValid && hasImageBank && !showModal
               ? "bg-green-500 hover:bg-green-600 active:bg-green-700"
               : "bg-slate-300 cursor-not-allowed"
-          } ${isFormValid && hasImageCard && hasImageBank && !showModal ? "cursor-pointer" : ""}`}
+          } ${isFormValid && hasImageBank && !showModal ? "cursor-pointer" : ""}`}
         >
           ลงทะเบียน
         </button>

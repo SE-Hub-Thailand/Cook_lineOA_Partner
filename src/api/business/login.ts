@@ -33,7 +33,7 @@ export const loginWithLineId = async (lineId: string) => {
             },
         };
     } catch (error) {
-        console.error('Authentication failed:', error.message);
+        // console.error('Authentication failed:', error.message);
         return false;
     }
 };
