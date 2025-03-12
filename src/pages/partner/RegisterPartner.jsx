@@ -448,7 +448,8 @@ const handleSubDistrictChange = (event) => {
         <Alert
           title="User registered successfully!"
           message={`Welcome, ${formData.username}! We’re so happy to have you on Cook Website.`}
-          path="/partner/add-product"
+          path="/partner/approval"
+          // path="/partner/add-product"
           status="success"
         />
       </>

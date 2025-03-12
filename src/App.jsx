@@ -83,10 +83,16 @@ const App = () => {
                             if (shopData) {
                                 console.log('shopData: ', shopData);
                                 console.log('shopData.id: ', shopData.id);
-                                localStorage.setItem('shopId', shopData.id);
+                                console.log('shopData.approved: ', shopData.approved);
+                                if (shopData.approved === true) {
+                                    // console.log("shopData.approved: ", shopData.approved);
+                                    localStorage.setItem('shopId', shopData.id);
+                                    console.log("Login successful. Redirecting to app...");
+                                    navigate('/partner/add-product');
+                                }
+                                else
+                                    navigate('/partner/approval');
                             }
-                            console.log("Login successful. Redirecting to app...");
-                            navigate('/partner/add-product');
                         } else if (userData.userType === "customer") {
                             console.log("hello customer");
                             navigate('/partner/pdpa/1');

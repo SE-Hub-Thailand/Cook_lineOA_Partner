@@ -41,6 +41,8 @@ import QrReader from './pages/partner/QrReader.jsx';
 import ReceiptModal from './pages/partner/ReceiptModal.jsx';
 import GetRedeem from './pages/partner/GetRedeem.jsx';
 import GetProductItems from './pages/partner/GetProductItems.jsx';
+import Approval from './pages/partner/Approval.jsx';
+
 
 // import ChooseWimon from './pages/ChooseWimon.jsx';
 import Register from './pages/Register.jsx';
@@ -180,6 +182,10 @@ const router = createBrowserRouter([
   {
     path: "/partner/pdpa/:id",
     element: <PDPA />
+  },
+  {
+    path: "/partner/approval",
+    element: <Approval />
   },
   {
     path: "/partner/scan-qr-code",

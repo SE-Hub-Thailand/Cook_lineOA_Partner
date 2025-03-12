@@ -31,6 +31,7 @@ export const getAllShops = async (token: string): Promise<Shop[]> => {
         const shops: Shop[] = data.data.map((item: any) => ({
             id: item.id,
             name: item.attributes.name,
+            approved: item.attributes.approved,
             location: item.attributes.location,
             latitude: item.attributes.latitude,
             longitude: item.attributes.longitude,
@@ -81,6 +82,7 @@ export const getShopByUserId = async (id: number, token: string): Promise<Shop> 
         const shop: Shop = {
             id: data?.data[0]?.id,
             name: data?.data[0]?.attributes?.name,
+            approved: data?.data[0]?.attributes?.approved,
             location: data?.data[0]?.attributes?.location,
             latitude: data?.data[0]?.attributes?.latitude,
             longitude: data?.data[0]?.attributes?.longitude,
@@ -146,6 +148,7 @@ export const getShopById = async (id: string, token: string): Promise<Shop> => {
         const shop: Shop = {
             id: data?.data[0]?.id,
             name: data?.data[0]?.attributes?.name,
+            approved: data?.data[0]?.attributes?.approved,
             location: data?.data[0]?.attributes?.location,
             latitude: data?.data[0]?.attributes?.latitude,
             longitude: data?.data[0]?.attributes?.longitude,

@@ -49,6 +49,7 @@ export interface Image {
   export interface Shop {
       id: number;
       name: string;
+      approved: boolean;
       location: string;
       latitude: string;
       longitude: string;

@@ -36,7 +36,6 @@ const CameraCapture = ({ onImageCaptured, initialImage, id }) => {
   const videoElementRef = useRef(null);
   const [cameraStream, setCameraStream] = useState(null);
   const [capturedImageData, setCapturedImageData] = useState(initialImage || null);
-  const [cameraMode, setCameraMode] = useState("user");
 
   useEffect(() => {
     if (!capturedImageData) initializeCamera();
@@ -46,12 +45,12 @@ const CameraCapture = ({ onImageCaptured, initialImage, id }) => {
         cameraStream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [cameraMode, capturedImageData]);
+  }, [capturedImageData]);
 
   const initializeCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: cameraMode }
+        video: { facingMode: "environment" }
       });
       setCameraStream(stream);
       if (videoElementRef.current) {
@@ -78,13 +77,6 @@ const CameraCapture = ({ onImageCaptured, initialImage, id }) => {
     } catch (error) {
       console.error("Error capturing photo:", error);
       alert("เกิดข้อผิดพลาดในการถ่ายรูป");
-    }
-  };
-
-  const switchCameraMode = () => {
-    setCameraMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
-    if (cameraStream) {
-      cameraStream.getTracks().forEach((track) => track.stop());
     }
   };
 
@@ -124,9 +116,6 @@ const CameraCapture = ({ onImageCaptured, initialImage, id }) => {
         <video ref={videoElementRef} autoPlay playsInline style={{ width: "100%" }} />
       )}
       <div className="flex justify-center mt-4 space-x-2">
-        {!capturedImageData && (
-          <ActionButton onClick={switchCameraMode}>สลับกล้อง</ActionButton>
-        )}
         <ActionButton onClick={capturePhoto} disabled={!!capturedImageData}>
           ถ่ายรูป
         </ActionButton>
