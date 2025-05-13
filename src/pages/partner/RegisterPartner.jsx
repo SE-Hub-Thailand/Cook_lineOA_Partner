@@ -367,7 +367,10 @@ const handleSubDistrictChange = (event) => {
           console.log("localStorage.getItem('token'): ", localStorage.getItem('token'));
           const response = await updateUser(get_user.id, {userType: "shop"}, response_user.jwt);
           if (response)
+          {
+            setLoading(false); // Stop loading
             setShowModal(true);
+          }
         }
       }
     } else if (id == 1) {
@@ -402,7 +405,10 @@ const handleSubDistrictChange = (event) => {
           // const response = await updateUser(get_user.id, {userType: "shop"}, response_user.jwt);
           console.log("response : ", response );
           if (response)
+          {
+            setLoading(false); // Stop loading
             setShowModal(true);
+          }
         }
       }
     }  else {

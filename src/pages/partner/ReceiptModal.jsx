@@ -173,47 +173,27 @@ export default function ReceiptModal({ id, product, item }) {
 
               {/* Slide to Confirm Section */}
               <div className="rounded-md p-6 mt-24 bg-gray-200">
-                <p className="text-center mt-4 font-semibold">สไลด์เพื่อยืนยันการส่งสินค้า</p>
-                <div className="flex w-72 items-center justify-center mt-6">
-                  <div className="relative w-full h-12 rounded-md">
-                    <ReactSlider
-                      className="absolute inset-0 h-full w-full flex items-center justify-center"
-                      value={slidePercent}
-                      onChange={handleSliderChange}
-                      min={0}
-                      max={100}
-                      renderTrack={(props) => (
-                        <div {...props} className="h-full" style={{ background: "#f5f5f5" }} />
-                      )}
-                      renderThumb={(props) => (
-                        <div
-                          {...props}
-                          className="absolute top-0 flex items-center justify-center w-12 h-full bg-yellow-500 text-white rounded-md cursor-pointer shadow-lg"
-                          style={{
-                            left: `${Math.min(slidePercent, 100)}%`,
-                            transform: "translateX(-50%)",
-                          }}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            className="w-6 h-6"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
-                      )}
-                    />
-                  </div>
+                <p className="text-center font-semibold mb-4">กดปุ่มเพื่อยืนยันการส่งสินค้า</p>
+
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => handleSliderChange(100)}
+                    disabled={isCompleted}
+                    className={`px-8 py-3 font-semibold rounded-lg text-white shadow-md transition-all duration-300 ${
+                      isCompleted
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700 active:bg-green-800"
+                    }`}
+                  >
+                    {isCompleted ? "ยืนยันเรียบร้อยแล้ว" : "ยืนยันการส่งสินค้า"}
+                  </button>
                 </div>
-                {!isCompleted && slidePercent < 100 ? (
-                  <p className="text-center text-red-500 mt-4">กรุณาสไลด์ให้สุดเพื่อยืนยันการส่งสินค้า</p>
-                ) : (
-                  <p className="text-center text-green-500 mt-4">ยืนยันการส่งสินค้าแล้ว</p>
+
+                {isCompleted && (
+                  <p className="text-center text-green-600 mt-4">ระบบได้ทำการยืนยันการส่งสินค้าเรียบร้อยแล้ว</p>
                 )}
               </div>
+
             </div>
           </div>
         </div>

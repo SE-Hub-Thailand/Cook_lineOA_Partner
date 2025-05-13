@@ -117,10 +117,6 @@ export default function AddProduct() {
         setProducts(ProductData);
         setLoading(false);
 
-        if (ProductData.length === 0) {
-          alert("No product for this shop");
-        //   navigate("/home");
-        }
       } catch (error) {
         console.error('Error fetching products:', error);
         setError(error.message);

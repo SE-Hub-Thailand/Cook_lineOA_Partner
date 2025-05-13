@@ -1,43 +1,48 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const LoginRegister = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const lineId = localStorage.getItem('lineId');
+    if (token && lineId) {
+      navigate('/partner/add-product'); // Default to main if already logged in
+    }
+  }, [navigate]);
+
   const handleRegister = () => {
-    navigate('/register'); // เปลี่ยนไปที่หน้า Register
+    navigate('/register');
   };
 
   const handleLogin = () => {
-    navigate('/login'); // เปลี่ยนไปที่หน้า App
+    navigate('/'); // Redirect to LIFF auth
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <h1 className="text-4xl font-semibold text-gray-800 mb-6 text-center">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
+      <h1 className="text-3xl font-bold text-gray-900 mb-4 text-center">
         Welcome to Cook Project
       </h1>
 
-      <p className="text-lg text-gray-600 mb-10 text-center max-w-2xl leading-relaxed">
-        Here’s a platform where you can bring your bottles or cans,
-        collect points, and exchange them for exciting rewards from our partner stores. <br />
-        It’s not just recycling&mdash;it’s rewarding sustainability
-        with endless possibilities!
+      <p className="text-gray-700 text-center mb-8 max-w-xl">
+        Recycle smarter. Earn rewards. Join our platform to exchange used cans or bottles
+        for exciting rewards from our partner stores.
       </p>
 
-      <div className="flex space-x-6">
+      <div className="flex space-x-4">
         <button
-          className="bg-[#FBB615] text-white font-medium py-2 px-6 rounded-lg shadow-lg hover:bg-yellow-600 transition duration-200 ease-in-out"
-          onClick={handleRegister} // เรียกใช้ฟังก์ชัน handleRegister เมื่อคลิกปุ่ม
+          className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded shadow"
+          onClick={handleRegister}
         >
           Register
         </button>
-
         <button
-          className="bg-[#15803d] text-white font-medium py-2 px-6 rounded-lg shadow-lg hover:bg-green-600 transition duration-200 ease-in-out"
-          onClick={handleLogin} // เรียกใช้ฟังก์ชัน handleLogin เมื่อคลิกปุ่ม
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+          onClick={handleLogin}
         >
-          Login with Line
+          Login with LINE
         </button>
       </div>
     </div>

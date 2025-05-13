@@ -1,137 +1,129 @@
 import React, { useEffect, useState } from "react";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ReceiptModal from "./ReceiptModal";
-import { useParams } from "react-router-dom";
-import TextModal from "../../components/TextModal";
+import { useParams, useNavigate } from "react-router-dom";
 import { getRedeemsByQrCode } from "../../api/strapi/redeemApi";
-import { getShopById } from "../../api/strapi/shopApi";
 import { getAllProductsByShopId } from "../../api/strapi/productApi";
 import Alert from "../../components/Alert";
-// import { useNavigate } from 'react-router-dom';
-// export default function GetRedeem({ qrCode}) {
+
 export default function GetRedeem() {
-//   const qrCode = "O4G7VhRjyD";
-//   const navigate = useNavigate();
-  const shopId = localStorage.getItem('shopId');
   const { qrCode } = useParams();
-  const API_URL = import.meta.env.VITE_API_URL;
-  const token = localStorage.getItem('token');
-  const [products, setProducts] = useState([]);
-//   const userId = localStorage.getItem('lineId');
-//   const [shop, setShop] = useState(null);
+  const navigate = useNavigate();
+  const shopId = localStorage.getItem("shopId");
+  // const token = localStorage.getItem("token");
 
   const [redeem, setRedeem] = useState(null);
   const [redeemId, setRedeemId] = useState(null);
-  const [items, setItems] = useState(null);
+  const [items, setItems] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-
+  
   useEffect(() => {
     const fetchRedeem = async () => {
       try {
         setLoading(true);
         const redeemData = await getRedeemsByQrCode(qrCode);
-        if (redeemData) {
-          setRedeem(redeemData[0]);
-          console.log("helloo redeemData: ", redeemData[0].status);
-          setRedeemId(redeemData[0].id);
+  
+        if (!redeemData || redeemData.length === 0) {
+          throw new Error("ไม่พบข้อมูลการแลกแต้ม");
         }
-            // localStorage.setItem('redeem', JSON.stringify(pointsData));
-            // getAllHistoryPoints(id, token);
-            console.log("redeemData.productJsonArray: ", redeemData[0].productJsonArray)
-            // console.log("json parse Point: ", redeemData.productJsonArray.length);
-        if (redeemData && redeemData[0].productJsonArray) {
-          const list = JSON.parse(redeemData[0].productJsonArray);
-          console.log("list: ", list);
-          const productArray = JSON.parse(list);
+  
+        const r = redeemData[0];
+  
+        // ✅ ตรวจสอบร้านค้า
+        if (!r.shop?.id || r.shop.id.toString() !== shopId?.toString()) {
+          throw new Error("QR นี้ไม่ตรงกับร้านของคุณ");
+        }
+  
+        setRedeem(r);
+        setRedeemId(r.id);
+  
+        try {
+          const parsed = JSON.parse(r.productJsonArray || "[]");
+          const productArray = JSON.parse(parsed);
           setItems(productArray);
-          console.log("productArray: ", productArray);
           if (productArray.length === 0) {
             setShowModal(true);
           }
+        } catch {
+          throw new Error("ไม่สามารถแปลงข้อมูลสินค้าได้");
         }
-        // console.log("redeem.l: ", redeem.length);
-        else {
-          console.log("errrrr");
-          setShowModal(true);
-          // return (<TextModal title="No data" message="not found" path="/partner/qr-reader" />);
-        }
-
-        setLoading(false); // หยุด loading
-      } catch (error) {
-        console.error("Error fetching history points:", error);
-		setShowModal(true);
-		// <TextModal title="No data" message="not found" path="/partner/qr-reader" />
-        setError(error.message);
+      } catch (err) {
+        console.error("❌ Redeem fetch error:", err);
+        setError(err.message || "เกิดข้อผิดพลาด");
+      } finally {
         setLoading(false);
-		// return (<TextModal title="No data" message="not found" path="/partner/qr-reader" />);
       }
     };
-
+  
     fetchRedeem();
-  }, [qrCode]);
+  }, [qrCode]);  
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        setLoading(true);
-        const ProductData = await getAllProductsByShopId(shopId);
-        setProducts(ProductData);
-        setLoading(false);
-        console.log("ProductData: ", ProductData);
-        if (ProductData.length === 0) {
-          alert("No product for this shop");
-        //   navigate("/home");
-        }
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        setError(error.message);
-        setLoading(false);
+        const productData = await getAllProductsByShopId(shopId);
+        setProducts(productData || []);
+      } catch (err) {
+        console.error("❌ Product fetch error:", err);
+        setError("ไม่สามารถโหลดรายการสินค้า");
       }
     };
 
     fetchProducts();
-  }, [shopId, token]);
+  }, [shopId]);
 
-  // let updatedStocks = [];
-
-  // // Update product stock and collect changed values
-  // products.forEach(product => {
-  //   items.forEach(item => {
-  //     if (product.id === item.id) {
-  //       product.numStock -= item.counts; // Deduct stock count
-  //       updatedStocks.push({ id: product.id, numStock: product.numStock }); // Collect updated stock
-  //     }
-  //   });
-  // });
-
-  // console.log("updatedStocks ", updatedStocks);
-
-  if (error) {
-	  setShowModal(true);
-	}
   if (loading) return <LoadingSpinner />;
 
-  return (
-    <>
-    {redeem.status === "approved" ?
-      (<Alert
-          title="การแลกสินค้าของรายการนี้ได้เสร็จสิ้นแล้วและไม่สามารถทำการแลกซ้ำได้"
-          message=""
-          path="/partner/qr-reader"
-          status="fail"
-        /> )
-    : showModal ?
-        (<Alert
-          title="ไม่พบข้อมูลสินค้า!"
-          message=""
-          path="/partner/qr-reader"
-          status="fail"
-        /> )
-        : (<ReceiptModal id={redeemId} product={products} redeem={redeem} item={items} />)
-      }
-    </>
+  if (error || !redeem) {
+    return (
+      <Alert
+        title="เกิดข้อผิดพลาด"
+        message={error || "ไม่สามารถโหลดข้อมูลการแลกแต้ม"}
+        path="/partner/qr-reader"
+        status="fail"
+      />
+    );
+  }
 
-  )
-};
+  if (redeem.status === "approved") {
+    return (
+      <Alert
+        title="รายการนี้ถูกใช้แล้ว"
+        message="ไม่สามารถแลกซ้ำได้"
+        path="/partner/qr-reader"
+        status="fail"
+      />
+    );
+  }
+
+  if (showModal) {
+    return (
+      <Alert
+        title="ไม่พบรายการสินค้า"
+        message="อาจเกิดจากการแลกแต้มที่ไม่สมบูรณ์"
+        path="/partner/qr-reader"
+        status="fail"
+      />
+    );
+  }
+
+  return (
+    <div className="px-4 mt-10 text-center">
+      <h2 className="text-xl font-bold text-gray-800">ยืนยันการแลกรายการ</h2>
+      <div className="mt-6">
+        <ReceiptModal id={redeemId} product={products} redeem={redeem} item={items} />
+      </div>
+      <div className="mt-8">
+        <button
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow-md"
+          onClick={() => navigate("/partner/qr-reader")}
+        >
+          กลับหน้าสแกน QR
+        </button>
+      </div>
+    </div>
+  );
+}
