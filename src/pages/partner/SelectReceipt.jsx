@@ -17,7 +17,8 @@ export default function ReceiptModal({ redeem, items, onClose }) {
     navigate('/partner/get-money-item'); // Go back to the previous page
   };
 
-  const totalpoint = items.reduce((sum, item) => sum + item.counts * item.point, 0);
+  const totalPoint = items.reduce((sum, item) => sum + item.counts * item.point, 0);
+  const totalPrice = items.reduce((sum, item) => sum + item.counts * item.price, 0);
 
   return (
     <>
@@ -33,26 +34,36 @@ export default function ReceiptModal({ redeem, items, onClose }) {
             <div className="w-full">
               <table className="min-w-full border-collapse border border-black">
                 <thead>
-                  <tr>
+                <tr>
                     <th className="px-4 py-2 border border-black">รายการสินค้า</th>
                     <th className="px-4 py-2 border border-black">จำนวน</th>
                     <th className="px-4 py-2 border border-black">มูลค่า (บาท)</th>
+                    <th className="px-4 py-2 border border-black">แลก (แต้ม)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((item, index) => (
-                    <tr key={index} className="text-center">
-                      <td className="px-4 py-2 border-r border-black">{item.name}</td>
-                      <td className="px-4 py-2 border-r border-black">{item.counts}</td>
-                      <td className="px-4 py-2">{item.point}</td>
-                    </tr>
+                    item.counts > 0 && (
+                      <tr key={index} className="text-center">
+                        <td className="px-4 py-2 border-r border-black">{item.name}</td>
+                        <td className="px-4 py-2 border-r border-black">{item.counts}</td>
+                        <td className="px-4 py-2 border-r border-black">{item.price * item.counts}</td>
+                        <td className="px-4 py-2">{item.point * item.counts}</td>
+                      </tr>
+                    )
                   ))}
                 </tbody>
               </table>
               <div className="mt-4 flex justify-between items-center font-bold">
-                <span className="text-lg">รวมเป็นมูลค่า</span>
-                <span className="text-lg">{totalpoint} บาท</span>
+                <span className="text-lg">รวมเป็น</span>
+                <span className="text-lg">{totalPoint} แต้ม</span>
               </div>
+
+              <div className="mt-4 flex justify-between items-center font-bold">
+                <span className="text-lg">รวมเป็นมูลค่า</span>
+                <span className="text-lg">{totalPrice} บาท</span>
+              </div>
+
             </div>
           </div>
         </div>

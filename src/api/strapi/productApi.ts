@@ -91,43 +91,59 @@ export const createProduct = async (
   ) => {
     try {
       const url = `${API_URL}/api/products/${productId}`;
-      console.log('updateProduct productId:', productId);
-      console.log('updateProduct productData:', productData);
-
-
+  
+      // 🔍 Step 1: Fetch existing product
+      const existingResponse = await fetch(url, {
+        headers: { "Content-Type": "application/json" },
+      });
+  
+      if (!existingResponse.ok) {
+        const errorData = await existingResponse.json();
+        console.error("Error fetching existing Product:", errorData);
+        throw new Error(`Fetch failed with status ${existingResponse.status}`);
+      }
+  
+      const existingData = await existingResponse.json();
+      const existing = existingData.data?.attributes || {};
+  
+      // 🔄 Step 2: Merge existing and incoming data
+      const mergedData = {
+        ...existing,
+        ...productData,
+      };
+  
+      // 🔁 Step 3: Normalize fields as needed
+      const normalizedData = {
+        name: mergedData.name,
+        description: mergedData.description,
+        price: parseFloat(mergedData.price),
+        point: mergedData.point,
+        approved: mergedData.approved,
+        numStock: parseInt(mergedData.numStock, 10),
+        type: mergedData.type,
+        shop: { id: mergedData.shop?.id || productData.shopId },
+        image: mergedData.image,
+      };
+  
       const response = await fetch(url, {
         method: "PUT",
         headers: {
-          // Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          data: {
-            name: productData.name,
-            description: productData.description || "",
-            price: parseFloat(productData.price),
-            point: productData.point || 0,
-            approved: productData.approved || false,
-            numStock: parseInt(productData.numStock, 10),
-            type: productData.type,
-            shop: { id: productData.shopId },
-            image: productData.image ? [{ id: productData.image }] : [],
-          },
-        }),
+        body: JSON.stringify({ data: normalizedData }),
       });
-
-      console.log('response:', response);
+  
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error updating Product:", errorData);
-        throw new Error(`Request failed with status ${response.status}`);
+        throw new Error(`Update failed with status ${response.status}`);
       }
-
+  
       const data = await response.json();
-    //   sendMessageCreateProduct(userLineId);
       return data;
     } catch (error: any) {
-      console.error("Error updating Product:", error.message);
+      console.error("Error in updateProduct:", error.message);
       throw error;
     }
   };
+  

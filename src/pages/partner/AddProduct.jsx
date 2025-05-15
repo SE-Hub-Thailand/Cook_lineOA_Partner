@@ -133,15 +133,6 @@ export default function AddProduct() {
     },
   });
 
-    // Function to handle file change from FileUpload component
-  // const handleFileChange = (file) => {
-  //   console.log("file change: ", file);
-  //   setFormData((prevData) => ({
-  //     ...prevData,
-  //     photoImage: file, // Store the file in formData
-  //   }));
-  // };
-
   const handleImageCaptured = (id, imageData) => {
     if (imageData) {
       localStorage.setItem(id, imageData);
@@ -164,21 +155,15 @@ export default function AddProduct() {
     }));
   };
 
-  // const handleImageUpload = (event) => {
-  //   const file = event.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       setUploadedImage(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("formData: ", formData);
-    // อัปโหลดรูปภาพก่อน ถ้ามีรูปภาพที่จะอัปโหลด
+    if (isSubmitting) return;
+      setIsSubmitting(true);
 
+      try {
+         // อัปโหลดรูปภาพก่อน ถ้ามีรูปภาพที่จะอัปโหลด
     let imageId = 0;
     const base64Image = localStorage.getItem('productImage');
     if (base64Image) {
@@ -190,17 +175,6 @@ export default function AddProduct() {
         formData.image = imageObject.url;
       }
     }
-
-    // const fileImage = localStorage.getItem('file');
-    // if (fileImage) {
-    //   console.log("fileImage: ", fileImage);
-    //   const imageObject = await handlePhotoUpload(fileImage)
-    //   console.log("file imageObject: ", imageObject);
-    //   if (imageObject) {
-    //     imageId = imageObject.id;
-    //     formData.image = imageObject.url;
-    //   }
-    // }
     console.log("imageId: ", imageId);
     const formula = await getFormulaPointByPrice(1);
     console.log("formula[0]: ", formula[0]);
@@ -215,23 +189,28 @@ export default function AddProduct() {
       shop: shopId,
       point: formula[0].point ? formula[0].point * formData.price : 10, //default point
     };
-  console.log("userData before: ", productData);
-    const response = await createProduct(productData);
-    if (response) {
-      console.log("Products created successfully!");
-      handleClose();
-      clearFormData();
-      Swal.fire({
-        icon: "success",
-        text: "ทำการเพิ่มสินค้าเรียบร้อยแล้ว รอการอนุมัติ",
-        position: "center",
-        showConfirmButton: true,
-        confirmButtonText: "ตกลง",
-      });
-      return;
-      // setShowModal(true);
-    } else {
-      throw new Error('Products create failed.');
+
+      console.log("userData before: ", productData);
+      const response = await createProduct(productData);
+      if (response) {
+        console.log("Products created successfully!");
+        handleClose();
+        clearFormData();
+        Swal.fire({
+          icon: "success",
+          text: "ทำการเพิ่มสินค้าเรียบร้อยแล้ว รอการอนุมัติ",
+          position: "center",
+          showConfirmButton: true,
+          confirmButtonText: "ตกลง",
+        });
+        return;
+      } else {
+        throw new Error('Products create failed.');
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -328,7 +307,8 @@ export default function AddProduct() {
               </button>
               <button
                 type="submit"
-                disabled={!isFormValid || !hasImage || showModal}
+                disabled={!isFormValid || !hasImage || showModal || isSubmitting}
+                // disabled={!isFormValid || !hasImage || showModal}
                 className={`h-10 rounded pr-4 pl-4 flex justify-center items-center col-span-1 justify-self-end ${
                   isFormValid && hasImage
                     ? "bg-green-hard-bg hover:bg-green-600 active:bg-green-700 pl-2 pr-2"

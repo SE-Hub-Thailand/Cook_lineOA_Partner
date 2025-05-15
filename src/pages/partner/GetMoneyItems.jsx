@@ -184,51 +184,6 @@ export default function GetMoneyItems() {
               </div>
             </div>
           ))}
-          {/* {showModal ? (<TextModal message="ไม่พบข้อมูลสินค้า" path="/partner/qr-reader" />) : (<ReceiptModal redeem={redeem} items={items} />)} */}
-          {/* <Modal
-            open={open}
-            onClose={handleClose}
-            aria-labelledby="modal-title"
-            aria-describedby="modal-description"
-          >
-            <Box sx={style}>
-              <div className="w-full h-20 bg-red-600 flex items-center justify-end px-3">
-                <HiX className="text-5xl text-white cursor-pointer" onClick={handleClose} />
-              </div>
-              {selectedReceipt && (
-                <>
-                  <TableContainer component={Paper} className="mt-10 px-6">
-                    <Table aria-label="simple table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>รายการสินค้า</TableCell>
-                          <TableCell align="right">จำนวน</TableCell>
-                          <TableCell align="right">มูลค่า (บาท)</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {selectedReceipt.items.map((item, index) => (
-                          <TableRow key={index}>
-                            <TableCell align="center">{item.name}</TableCell>
-                            <TableCell align="right">{item.quantity}</TableCell>
-                            <TableCell align="right">{item.price}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                  <div className="border-t-2 border-gray-200 mt-4"></div>
-                  <div className="flex mt-3 px-11">
-                    <div className="flex-none w-40">รวมเป็นมูลค่า</div>
-                    <div className="flex-none w-20 text-center">
-                      {selectedReceipt.items.reduce((sum, item) => sum + item.quantity * item.price, 0)}
-                    </div>
-                    <div className="flex-none w-40 text-center">บาท</div>
-                  </div>
-                </>
-              )}
-            </Box>
-          </Modal> */}
 
         </Container>
       </ThemeProvider>

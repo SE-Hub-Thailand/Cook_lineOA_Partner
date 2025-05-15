@@ -9,7 +9,7 @@ export const getAllShops = async (token: string): Promise<Shop[]> => {
     }
     try {
         // const API_URL = 'https://cookbstaging.careervio.com/api/shops/?populate=image
-        const url = `${API_URL}/api/shops/?populate=image`;
+        const url = `${API_URL}/api/shops?pagination[limit]=1000&populate=image&filters[approved]=true`;
         // console.log('url', url);
         const response = await fetch(url, {
             method: 'GET',

@@ -41,7 +41,7 @@ const App = () => {
         }
 
         if (!liff || typeof liff.init !== 'function') {
-          setErrorMessage('LIFF is not ready. Please try again.');
+          // setErrorMessage('LIFF is not ready. Please try again.');
           return;
         }
 
