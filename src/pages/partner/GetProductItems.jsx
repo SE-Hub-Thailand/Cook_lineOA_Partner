@@ -107,17 +107,19 @@ const shopId = localStorage.getItem('shopId');
 
           {filteredProducts.map((product, index) => (
             <div key={index} className="w-full bg-white mt-10 rounded-lg shadow-md p-5 relative">
-              <div className="absolute top-4 right-2">
-                <span
-                  className={`px-2 py-1 rounded-md text-sm ${
-                    product.status === "approved"
-                      ? "text-green-600 border border-green-600"
-                      : "text-red-600 border border-red-600"
-                  }`}
-                >
-                  {product.status === "approved" ? "อนุมัติแล้ว" :"ยังไม่อนุมัติ"}
-                </span>
-              </div>
+              <div className="absolute top-4 right-4">
+                  <span
+                    className={`px-3 py-1 rounded-md text-sm ${
+                      product.status === "pending" ? "bg-yellow-200 border border-yellow-200 text-yellow-800" :
+                      product.status === "approved" ? "bg-green-200 border border-green-200 text-green-800" :
+                      product.status === "rejected" ? "bg-red-200 border border-red-200 text-red-800" : ""
+                    }`}
+                  >
+                    {product.status === "pending" ? "รอการอนุมัติ" :
+                    product.status === "approved" ? "อนุมัติแล้ว" :
+                    product.status === "rejected" ? "ไม่อนุมัติ" : ""}
+                  </span>
+                </div>
 
               <p>เลขที่ใบรายการเพิ่มสินค้า : {formatNumber(product.id)}</p>
               <p className="mt-2">{product.name}</p>
@@ -133,10 +135,9 @@ const shopId = localStorage.getItem('shopId');
                   <TextModal
                     message="ไม่มีหลักฐานการชำระ"
                     path="/partner/get-money-item"
+                    onClose={() => setShowErrorModal(false)}
                   />
                 )}
-
-
               </div>
             </div>
           ))}

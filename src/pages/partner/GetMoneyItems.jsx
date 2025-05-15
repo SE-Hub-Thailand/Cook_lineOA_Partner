@@ -177,6 +177,7 @@ export default function GetMoneyItems() {
                   <TextModal
                     message="ไม่มีหลักฐานการชำระ"
                     path="/partner/get-money-item"
+                    onClose={() => setShowErrorModal(false)}
                   />
                 )}
 

@@ -4,14 +4,17 @@ import "../style.css"
 import { useLiff } from 'react-liff';
 import { useNavigate } from 'react-router-dom';
 import { useState } from "react";
-import LoadingSpinner from '../LoadingSpinner';
+// import LoadingSpinner from '../LoadingSpinner';
 function Header() {
-    const userId = localStorage.getItem('lineId');
+    // const userId = localStorage.getItem('lineId');
     // const userId = import.meta.env.VITE_USER_ID;
     const navigate = useNavigate();
 
     const {liff } = useLiff();
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
+    if (!token) {
+        navigate('/'); 
+    }
     // const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [clicked, setClicked] = useState(false); // For mobile menu toggle
@@ -25,13 +28,13 @@ function Header() {
     if (liff) {
         liff.logout();
     }
-    localStorage.removeItem('accessToken');
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/'); // Redirect to login page
   };
   // Loading and Error handling
 //   if (loading) return <LoadingSpinner />
-  if (error) return <p>Error: {error}</p>;
+  if (error) return ;
     return(
         <>
             <nav className="flex items-center justify-between p-5 pr-20 bg-white">

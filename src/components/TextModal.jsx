@@ -1,17 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // นำ useNavigate เข้ามาใช้
 
-export default function TextModal({ message, path }) {
+export default function TextModal({ message, path, onClose }) {
   const [showModal, setShowModal] = useState(true); // Modal is initially visible
   const navigate = useNavigate(); // เรียกใช้ useNavigate
-  const closeModal = () => {
-    setShowModal(false); // Close modal on button click
     if (path)
       navigate(path);
     else
       navigate(0);
-  };
-
   return (
     <>
       {showModal && (
@@ -20,7 +16,7 @@ export default function TextModal({ message, path }) {
             {/* Close Button */}
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-              onClick={closeModal}
+              onClick={onClose}
             >
               &times;
             </button>

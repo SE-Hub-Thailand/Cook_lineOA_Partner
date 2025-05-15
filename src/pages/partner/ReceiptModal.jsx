@@ -56,7 +56,6 @@ export default function ReceiptModal({ id, product, item }) {
   const handleConfirmClick = async () => {
     console.log("product: ", product);
     
-
     setIsCompleted(true);
     let updatedStocks = [];
     let totalPrice = 0;

@@ -3,12 +3,14 @@ import QrScanner from "qr-scanner";
 import QrFrame from "../../assets/images/qr-frame.svg";
 import TextModal from "../../components/TextModal";
 import { useNavigate } from 'react-router-dom';
-import { HiArrowLeft } from "react-icons/hi"; // import ไอคอน back
-import logo from "../../assets/images/logo.png";
 import Header from "../../components/partner/Header";
 
 const QrReader = () => {
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  if (!token) {
+    navigate('/'); 
+  }
   const scanner = useRef(null);
   const videoEl = useRef(null);
   const qrBoxEl = useRef(null);
@@ -74,7 +76,10 @@ const QrReader = () => {
     <>
       <Header />
       {showModal && (
-        <TextModal message="Camera is blocked or not accessible. Please allow camera in your browser permissions and Reload." />
+        <TextModal 
+          message="Camera is blocked or not accessible. Please allow camera in your browser permissions and Reload." 
+          onClose={() => setShowModal(false)}
+          />
       )}
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-yellow-100 via-pink-100 to-blue-100 relative">
         <div className="relative w-80 h-80 bg-white rounded-lg shadow-lg flex items-center justify-center">
